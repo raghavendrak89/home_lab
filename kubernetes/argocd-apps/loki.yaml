@@ -35,6 +35,7 @@ spec:
             working_directory: /var/loki/compactor
             retention_enabled: true
             retention_delete_delay: 2h
+            delete_request_store: filesystem
 
         singleBinary:
           replicas: 1
