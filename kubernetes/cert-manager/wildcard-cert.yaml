@@ -12,6 +12,16 @@ spec:
   dnsNames:
     - "*.home"
     - "home"
+    - "grafana.home"
+    - "prometheus.home"
+    - "alertmanager.home"
+    - "pihole.home"
+    - "searxng.home"
+    - "argocd.home"
+    - "ollama.home"
+    - "ai.home"
+    - "status.home"
+    - "vault.home"
   issuerRef:
     name: homelab-ca-issuer
     kind: ClusterIssuer
