@@ -261,7 +261,7 @@ spec:
               cpu: "200m"
               memory: "256Mi"
 ---
-# Frontend (web + space in one pod)
+# Frontend web app (pre-built nginx static)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -280,35 +280,8 @@ spec:
       containers:
         - name: web
           image: makeplane/plane-frontend:stable
-          command: ["node", "apps/app/server.js", "apps/app"]
-          env:
-            - name: NEXT_PUBLIC_API_BASE_URL
-              value: "https://plane.home"
-            - name: NEXT_PUBLIC_WEB_BASE_URL
-              value: "https://plane.home"
-            - name: NEXT_PUBLIC_SPACE_BASE_URL
-              value: "https://plane.home/spaces"
           ports:
-            - containerPort: 3000
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "256Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-        - name: space
-          image: makeplane/plane-frontend:stable
-          command: ["node", "apps/space/server.js", "apps/space"]
-          env:
-            - name: NEXT_PUBLIC_API_BASE_URL
-              value: "https://plane.home"
-            - name: NEXT_PUBLIC_WEB_BASE_URL
-              value: "https://plane.home"
-            - name: NEXT_PUBLIC_SPACE_BASE_URL
-              value: "https://plane.home/spaces"
-          ports:
-            - containerPort: 3001
+            - containerPort: 80
           resources:
             requests:
               cpu: "100m"
@@ -326,12 +299,8 @@ spec:
   selector:
     app: plane-web
   ports:
-    - name: web
-      port: 3000
-      targetPort: 3000
-    - name: space
-      port: 3001
-      targetPort: 3001
+    - port: 80
+      targetPort: 80
 ---
 # Ingress — route /api/ and /auth/ to backend, rest to frontend
 apiVersion: networking.k8s.io/v1
@@ -342,7 +311,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
@@ -363,17 +331,10 @@ spec:
                 name: plane-api
                 port:
                   number: 8000
-          - path: /spaces/
-            pathType: Prefix
-            backend:
-              service:
-                name: plane-web
-                port:
-                  number: 3001
           - path: /
             pathType: Prefix
             backend:
               service:
                 name: plane-web
                 port:
-                  number: 3000
+                  number: 80
