@@ -15,5 +15,15 @@ data:
     address=/argocd.home/192.168.0.201
     address=/ollama.home/192.168.0.201
     address=/status.home/192.168.0.201
+    # Proxmox Nodes & Physical Infrastructure
+    address=/pve01.home/192.168.0.13
+    address=/pve-node-01.home/192.168.0.13
+    address=/pve02.home/192.168.0.14
+    address=/pve-node-02.home/192.168.0.14
+    address=/ai01.home/192.168.0.11
+    address=/pve-ai-01.home/192.168.0.11
+    address=/userv.home/192.168.0.193
+    address=/switch.home/192.168.0.10
+    address=/pbs.home/192.168.0.20
     address=/vault.home/192.168.0.201
     address=/nextcloud.home/192.168.0.201
