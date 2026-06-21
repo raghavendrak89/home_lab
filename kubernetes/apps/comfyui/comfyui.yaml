@@ -33,7 +33,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: comfyui
-          image: yanwk/comfyui-boot:cu124
+          image: yanwk/comfyui-boot:cu126-megapak
           ports:
             - containerPort: 8188
           env:
