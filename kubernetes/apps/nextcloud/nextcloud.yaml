@@ -186,11 +186,10 @@ spec:
             - name: data
               mountPath: /var/www/html
           readinessProbe:
-            httpGet:
-              path: /status.php
+            tcpSocket:
               port: 80
-            initialDelaySeconds: 60
-            periodSeconds: 15
+            initialDelaySeconds: 30
+            periodSeconds: 10
             failureThreshold: 10
       volumes:
         - name: data
