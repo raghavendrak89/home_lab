@@ -153,6 +153,10 @@ spec:
           env:
             - name: REDIS_URL
               value: "redis://redis:6379/"
+            - name: CELERY_BROKER_URL
+              value: "redis://redis:6379/0"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://redis:6379/0"
             - name: WEB_URL
               value: "https://plane.home"
             - name: CORS_ALLOWED_ORIGINS
@@ -213,6 +217,10 @@ spec:
           env:
             - name: REDIS_URL
               value: "redis://redis:6379/"
+            - name: CELERY_BROKER_URL
+              value: "redis://redis:6379/0"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://redis:6379/0"
             - name: DJANGO_SETTINGS_MODULE
               value: "plane.settings.production"
             - name: USE_MINIO
@@ -251,6 +259,10 @@ spec:
           env:
             - name: REDIS_URL
               value: "redis://redis:6379/"
+            - name: CELERY_BROKER_URL
+              value: "redis://redis:6379/0"
+            - name: CELERY_RESULT_BACKEND
+              value: "redis://redis:6379/0"
             - name: DJANGO_SETTINGS_MODULE
               value: "plane.settings.production"
           resources:
