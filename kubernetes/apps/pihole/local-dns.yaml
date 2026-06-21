@@ -28,3 +28,4 @@ data:
     address=/vault.home/192.168.0.201
     address=/nextcloud.home/192.168.0.201
     address=/comfyui.home/192.168.0.201
+    address=/plane.home/192.168.0.201

@@ -1,0 +1,379 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plane
+---
+# Postgres
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: plane-postgres-pvc
+  namespace: plane
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: plane
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_USER
+              value: plane
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: plane-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: plane
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: plane-postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: plane
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# Redis
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: plane
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+# Plane API (with migrator initContainer)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plane-api
+  namespace: plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plane-api
+  template:
+    metadata:
+      labels:
+        app: plane-api
+    spec:
+      initContainers:
+        - name: migrator
+          image: makeplane/plane-backend:stable
+          command: ["./bin/docker-entrypoint-migrator.sh"]
+          envFrom:
+            - secretRef:
+                name: plane-secret
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379/"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "plane.settings.production"
+      containers:
+        - name: api
+          image: makeplane/plane-backend:stable
+          command: ["./bin/docker-entrypoint-api.sh"]
+          envFrom:
+            - secretRef:
+                name: plane-secret
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379/"
+            - name: WEB_URL
+              value: "https://plane.home"
+            - name: CORS_ALLOWED_ORIGINS
+              value: "https://plane.home"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "plane.settings.production"
+            - name: GUNICORN_WORKERS
+              value: "2"
+            - name: USE_MINIO
+              value: "0"
+            - name: FILE_SIZE_LIMIT
+              value: "5242880"
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plane-api
+  namespace: plane
+spec:
+  selector:
+    app: plane-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+# Celery Worker
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plane-worker
+  namespace: plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plane-worker
+  template:
+    metadata:
+      labels:
+        app: plane-worker
+    spec:
+      containers:
+        - name: worker
+          image: makeplane/plane-backend:stable
+          command: ["./bin/docker-entrypoint-worker.sh"]
+          envFrom:
+            - secretRef:
+                name: plane-secret
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379/"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "plane.settings.production"
+            - name: USE_MINIO
+              value: "0"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+# Beat Worker (scheduler)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plane-beat-worker
+  namespace: plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plane-beat-worker
+  template:
+    metadata:
+      labels:
+        app: plane-beat-worker
+    spec:
+      containers:
+        - name: beat-worker
+          image: makeplane/plane-backend:stable
+          command: ["./bin/docker-entrypoint-beat.sh"]
+          envFrom:
+            - secretRef:
+                name: plane-secret
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379/"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "plane.settings.production"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+---
+# Frontend (web + space in one pod)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plane-web
+  namespace: plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plane-web
+  template:
+    metadata:
+      labels:
+        app: plane-web
+    spec:
+      containers:
+        - name: web
+          image: makeplane/plane-frontend:stable
+          command: ["node", "apps/app/server.js", "apps/app"]
+          env:
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: "https://plane.home"
+            - name: NEXT_PUBLIC_WEB_BASE_URL
+              value: "https://plane.home"
+            - name: NEXT_PUBLIC_SPACE_BASE_URL
+              value: "https://plane.home/spaces"
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+        - name: space
+          image: makeplane/plane-frontend:stable
+          command: ["node", "apps/space/server.js", "apps/space"]
+          env:
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: "https://plane.home"
+            - name: NEXT_PUBLIC_WEB_BASE_URL
+              value: "https://plane.home"
+            - name: NEXT_PUBLIC_SPACE_BASE_URL
+              value: "https://plane.home/spaces"
+          ports:
+            - containerPort: 3001
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plane-web
+  namespace: plane
+spec:
+  selector:
+    app: plane-web
+  ports:
+    - name: web
+      port: 3000
+      targetPort: 3000
+    - name: space
+      port: 3001
+      targetPort: 3001
+---
+# Ingress — route /api/ and /auth/ to backend, rest to frontend
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plane
+  namespace: plane
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: plane.home
+      http:
+        paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: plane-api
+                port:
+                  number: 8000
+          - path: /auth/
+            pathType: Prefix
+            backend:
+              service:
+                name: plane-api
+                port:
+                  number: 8000
+          - path: /spaces/
+            pathType: Prefix
+            backend:
+              service:
+                name: plane-web
+                port:
+                  number: 3001
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: plane-web
+                port:
+                  number: 3000
