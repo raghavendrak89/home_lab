@@ -1,0 +1,90 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comfyui
+  namespace: comfyui
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: comfyui
+  template:
+    metadata:
+      labels:
+        app: comfyui
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: talos-zlt-fqg
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: comfyui
+          image: yanwk/comfyui-boot:cu124
+          ports:
+            - containerPort: 8188
+          env:
+            - name: CLI_ARGS
+              value: "--listen 0.0.0.0"
+          resources:
+            requests:
+              cpu: "2"
+              memory: "4Gi"
+            limits:
+              cpu: "6"
+              memory: "20Gi"
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: models
+              mountPath: /root/ComfyUI/models
+            - name: output
+              mountPath: /root/ComfyUI/output
+      volumes:
+        - name: models
+          hostPath:
+            path: /var/local/comfyui-models
+            type: DirectoryOrCreate
+        - name: output
+          hostPath:
+            path: /var/local/comfyui-output
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comfyui
+  namespace: comfyui
+spec:
+  selector:
+    app: comfyui
+  ports:
+    - port: 8188
+      targetPort: 8188
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: comfyui
+  namespace: comfyui
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "2048m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: comfyui.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: comfyui
+                port:
+                  number: 8188

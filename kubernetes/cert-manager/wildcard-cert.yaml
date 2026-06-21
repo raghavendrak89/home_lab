@@ -23,6 +23,7 @@ spec:
     - "status.home"
     - "vault.home"
     - "nextcloud.home"
+    - "comfyui.home"
   issuerRef:
     name: homelab-ca-issuer
     kind: ClusterIssuer
