@@ -1,0 +1,17 @@
+# Wildcard cert for *.home — stored in ingress-nginx namespace so NGINX can use it as default SSL
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: homelab-wildcard
+  namespace: ingress-nginx
+spec:
+  secretName: homelab-tls
+  duration: 8760h   # 1 year
+  renewBefore: 720h # renew 30 days before expiry
+  commonName: "*.home"
+  dnsNames:
+    - "*.home"
+    - "home"
+  issuerRef:
+    name: homelab-ca-issuer
+    kind: ClusterIssuer
