@@ -22,6 +22,7 @@ spec:
     - "ai.home"
     - "status.home"
     - "vault.home"
+    - "nextcloud.home"
   issuerRef:
     name: homelab-ca-issuer
     kind: ClusterIssuer
