@@ -1,0 +1,113 @@
+grafana:
+  adminPassword: "changeme"
+
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    size: 5Gi
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - grafana.home
+    paths:
+      - /
+
+  # Pre-load the NVIDIA DCGM dashboard
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  dashboards:
+    default:
+      nvidia-dcgm:
+        gnetId: 12239
+        revision: 2
+        datasource: Prometheus
+      node-exporter:
+        gnetId: 1860
+        revision: 37
+        datasource: Prometheus
+      kubernetes-cluster:
+        gnetId: 7249
+        revision: 1
+        datasource: Prometheus
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    securityContext:
+      runAsUser: 0
+      runAsNonRoot: false
+      fsGroup: 0
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    # Scrape all ServiceMonitors across namespaces
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+
+  config:
+    global:
+      resolve_timeout: 5m
+      smtp_smarthost: "smtp.gmail.com:587"
+      smtp_from: "your@email.com"
+      smtp_auth_username: "your@email.com"
+      smtp_auth_password: "your-gmail-app-password"
+      smtp_require_tls: true
+    route:
+      group_by: ["alertname", "namespace"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: email
+      routes:
+        - receiver: email
+          matchers:
+            - alertname =~ ".*"
+    receivers:
+      - name: email
+        email_configs:
+          - to: "your@email.com"
+            send_resolved: true
+            headers:
+              Subject: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+            text: |
+              {{ range .Alerts }}
+              Alert: {{ .Annotations.summary }}
+              Details: {{ .Annotations.description }}
+              Status: {{ .Status }}
+              {{ end }}
+
+# node-exporter runs on every node — needs privileged to access host metrics
+nodeExporter:
+  enabled: true
+
+kube-state-metrics:
+  enabled: true

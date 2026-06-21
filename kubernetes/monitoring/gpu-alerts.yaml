@@ -1,0 +1,122 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gpu-alerts
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: gpu.rules
+      interval: 30s
+      rules:
+        - alert: GPUTemperatureHigh
+          expr: DCGM_FI_DEV_GPU_TEMP > 80
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "GPU temperature high ({{ $value }}°C)"
+            description: "GPU on {{ $labels.Hostname }} has been above 80°C for 2 minutes. RTX 3090 throttles at 83°C."
+
+        - alert: GPUTemperatureCritical
+          expr: DCGM_FI_DEV_GPU_TEMP > 83
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "GPU temperature CRITICAL ({{ $value }}°C)"
+            description: "GPU on {{ $labels.Hostname }} is throttling (>83°C). Ollama inference will slow down."
+
+        - alert: GPUPowerNearCap
+          expr: DCGM_FI_DEV_POWER_USAGE > 270
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "GPU power near 290W cap ({{ $value }}W)"
+            description: "GPU on {{ $labels.Hostname }} drawing {{ $value }}W — within 20W of the 290W safety cap."
+
+        - alert: GPUVRAMHigh
+          expr: (DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE)) * 100 > 90
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "GPU VRAM usage high ({{ $value | humanize }}%)"
+            description: "GPU VRAM on {{ $labels.Hostname }} is above 90%. Loading a larger model may fail."
+
+        - alert: GPUVRAMCritical
+          expr: (DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE)) * 100 > 98
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "GPU VRAM nearly full ({{ $value | humanize }}%)"
+            description: "GPU VRAM on {{ $labels.Hostname }} is >98%. OOM crash likely."
+
+    - name: node.rules
+      rules:
+        - alert: NodeMemoryPressure
+          expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Low memory on {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} has less than 10% memory available."
+
+        - alert: NodeDiskSpaceLow
+          expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Low disk space on {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} root filesystem is {{ $value | humanize }}% free. Ollama models may fill this."
+
+        - alert: NodeDiskSpaceCritical
+          expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 5
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "CRITICAL disk space on {{ $labels.instance }}"
+            description: "Node {{ $labels.instance }} has less than 5% disk free. Pods may crash."
+
+        - alert: PodOOMKilled
+          expr: increase(kube_pod_container_status_restarts_total[15m]) > 0
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod restarting: {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has restarted. May be OOMKilled."
+
+        - alert: GPUWorkerNodeDown
+          expr: kube_node_status_condition{node="talos-zlt-fqg", condition="Ready", status="true"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "GPU worker node is NotReady"
+            description: "talos-zlt-fqg (GPU worker) has been NotReady for 2 minutes. Ollama is down."
+
+        - alert: OllamaDown
+          expr: kube_deployment_status_replicas_available{deployment="ollama", namespace="ai"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Ollama is down"
+            description: "Ollama deployment has 0 available replicas. No inference available."
+
+        - alert: ProxmoxNodeNetworkDown
+          expr: node_network_carrier{device!="lo",device!~"veth.*|cali.*|tunl.*|flannel.*|cni.*"} == 0
+          for: 30s
+          labels:
+            severity: critical
+          annotations:
+            summary: "NIC link down on {{ $labels.instance }}"
+            description: "Network interface {{ $labels.device }} on {{ $labels.instance }} has lost carrier. Check switch port and cable — this caused pve-node-01 outages twice."

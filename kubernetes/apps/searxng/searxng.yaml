@@ -1,0 +1,112 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-config
+  namespace: searxng
+data:
+  settings.yml: |
+    use_default_settings: true
+
+    server:
+      secret_key: "change-me"  # overridden by SEARXNG_SECRET env var at runtime
+      limiter: false
+      image_proxy: true
+      base_url: "http://searxng.home/"
+      port: 8080
+      bind_address: "0.0.0.0"
+
+    search:
+      safe_search: 0
+      default_lang: "en"
+      formats:
+        - html
+        - json
+
+    ui:
+      default_theme: simple
+      center_alignment: true
+      default_locale: en
+
+    enabled_plugins:
+      - "Hash plugin"
+      - "Self Informations"
+      - "Tracker URL remover"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+  namespace: searxng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: searxng
+          image: searxng/searxng:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SEARXNG_BASE_URL
+              value: "http://searxng.home/"
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: searxng-secret
+                  key: secret_key
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng/settings.yml
+              subPath: settings.yml
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: searxng-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: searxng-svc
+  namespace: searxng
+spec:
+  type: ClusterIP
+  selector:
+    app: searxng
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: searxng
+  namespace: searxng
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: searxng.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: searxng-svc
+                port:
+                  number: 8080

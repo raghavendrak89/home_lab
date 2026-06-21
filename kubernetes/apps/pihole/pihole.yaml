@@ -1,0 +1,172 @@
+---
+# PVCs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-config
+  namespace: pihole
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-dnsmasq
+  namespace: pihole
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 100Mi
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+        - name: pihole
+          image: pihole/pihole:2024.07.0
+          env:
+            - name: TZ
+              value: "Australia/Melbourne"
+            - name: WEBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-secret
+                  key: WEBPASSWORD
+            - name: PIHOLE_DNS_
+              value: "8.8.8.8;8.8.4.4"
+            - name: DNSMASQ_LISTENING
+              value: "all"
+          ports:
+            - containerPort: 53
+              protocol: TCP
+              name: dns-tcp
+            - containerPort: 53
+              protocol: UDP
+              name: dns-udp
+            - containerPort: 80
+              protocol: TCP
+              name: http
+          volumeMounts:
+            - name: pihole-config
+              mountPath: /etc/pihole
+            - name: pihole-dnsmasq
+              mountPath: /etc/dnsmasq.d
+            - name: local-dns
+              mountPath: /etc/dnsmasq.d/05-homelab.conf
+              subPath: homelab.conf
+          securityContext:
+            capabilities:
+              add: [NET_ADMIN]
+          readinessProbe:
+            httpGet:
+              path: /admin/
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: pihole-config
+          persistentVolumeClaim:
+            claimName: pihole-config
+        - name: pihole-dnsmasq
+          persistentVolumeClaim:
+            claimName: pihole-dnsmasq
+        - name: local-dns
+          configMap:
+            name: pihole-local-dns
+---
+# DNS Service TCP (port 53)
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-dns-tcp
+  namespace: pihole
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.202
+    metallb.universe.tf/allow-shared-ip: pihole-dns
+spec:
+  type: LoadBalancer
+  selector:
+    app: pihole
+  ports:
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+---
+# DNS Service UDP (port 53)
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-dns-udp
+  namespace: pihole
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.202
+    metallb.universe.tf/allow-shared-ip: pihole-dns
+spec:
+  type: LoadBalancer
+  selector:
+    app: pihole
+  ports:
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+---
+# Admin UI Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole
+  namespace: pihole
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /admin/
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: pihole.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pihole-admin
+                port:
+                  number: 80
+---
+# Admin UI Service (ClusterIP for Ingress)
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-admin
+  namespace: pihole
+spec:
+  type: ClusterIP
+  selector:
+    app: pihole
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP

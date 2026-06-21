@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-power-capper
+  namespace: kube-system
+  labels:
+    app: nvidia-power-capper
+spec:
+  selector:
+    matchLabels:
+      name: nvidia-power-capper
+  template:
+    metadata:
+      labels:
+        name: nvidia-power-capper
+    spec:
+      nodeSelector:
+        nvidia.com/gpu: "true"
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+      hostPID: true
+      hostIPC: true
+      containers:
+        - name: nvidia-power-capper
+          image: nvidia/cuda:12.3.0-base-ubuntu22.04
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_ADMIN"]
+          command:
+            - "/bin/bash"
+            - "-c"
+            - |
+              echo "Starting Nvidia power limit daemon..."
+              # 1. Enable persistence mode (makes GPU settings stick)
+              nvidia-smi -pm 1
+              # 2. Set power limit to 290 Watts (protects motherboard rails)
+              nvidia-smi -pl 290
+              echo "Power limit successfully set to 290W. Daemon is running..."
+              tail -f /dev/null
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
