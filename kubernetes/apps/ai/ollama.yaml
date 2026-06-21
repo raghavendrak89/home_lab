@@ -67,6 +67,9 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "2048m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/auth-type: "basic"
+    nginx.ingress.kubernetes.io/auth-secret: "ollama-basic-auth"
+    nginx.ingress.kubernetes.io/auth-realm: "Ollama API"
 spec:
   ingressClassName: nginx
   rules:
