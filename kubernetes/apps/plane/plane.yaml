@@ -159,6 +159,12 @@ spec:
               value: "redis://redis:6379/0"
             - name: WEB_URL
               value: "https://plane.home"
+            - name: APP_BASE_URL
+              value: "https://plane.home"
+            - name: ADMIN_BASE_URL
+              value: "https://plane.home/god-mode"
+            - name: SPACE_BASE_URL
+              value: "https://plane.home/spaces"
             - name: CORS_ALLOWED_ORIGINS
               value: "https://plane.home"
             - name: DJANGO_SETTINGS_MODULE
@@ -314,6 +320,47 @@ spec:
     - port: 3000
       targetPort: 3000
 ---
+# Admin (god-mode) panel
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plane-admin
+  namespace: plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plane-admin
+  template:
+    metadata:
+      labels:
+        app: plane-admin
+    spec:
+      containers:
+        - name: admin
+          image: makeplane/plane-admin:stable
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: plane-admin
+  namespace: plane
+spec:
+  selector:
+    app: plane-admin
+  ports:
+    - port: 80
+      targetPort: 80
+---
 # Ingress — route /api/ and /auth/ to backend, rest to frontend
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -343,6 +390,13 @@ spec:
                 name: plane-api
                 port:
                   number: 8000
+          - path: /god-mode/
+            pathType: Prefix
+            backend:
+              service:
+                name: plane-admin
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
