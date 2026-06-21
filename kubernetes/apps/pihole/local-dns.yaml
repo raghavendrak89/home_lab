@@ -14,3 +14,4 @@ data:
     address=/searxng.home/192.168.0.201
     address=/argocd.home/192.168.0.201
     address=/ollama.home/192.168.0.201
+    address=/status.home/192.168.0.201
