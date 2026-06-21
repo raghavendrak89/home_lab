@@ -63,6 +63,13 @@ spec:
                 secretKeyRef:
                   name: searxng-secret
                   key: secret_key
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
           volumeMounts:
             - name: config
               mountPath: /etc/searxng/settings.yml

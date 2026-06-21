@@ -28,8 +28,13 @@ spec:
             - name: OLLAMA_MODELS
               value: /models
           resources:
+            requests:
+              cpu: "2"
+              memory: "8Gi"
             limits:
-              nvidia.com/gpu: '1'
+              cpu: "6"
+              memory: "40Gi"
+              nvidia.com/gpu: "1"
           volumeMounts:
             - name: models
               mountPath: /models

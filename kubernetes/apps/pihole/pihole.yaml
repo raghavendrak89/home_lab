@@ -75,6 +75,13 @@ spec:
             - name: local-dns
               mountPath: /etc/dnsmasq.d/05-homelab.conf
               subPath: homelab.conf
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           securityContext:
             capabilities:
               add: [NET_ADMIN]

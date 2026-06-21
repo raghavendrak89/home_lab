@@ -1,5 +1,12 @@
 grafana:
   adminPassword: "changeme"
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "1"
+      memory: "512Mi"
 
   persistence:
     enabled: true
@@ -45,6 +52,13 @@ grafana:
 prometheus:
   prometheusSpec:
     retention: 15d
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2"
+        memory: "3Gi"
     securityContext:
       runAsUser: 0
       runAsNonRoot: false
@@ -64,6 +78,13 @@ prometheus:
 
 alertmanager:
   alertmanagerSpec:
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "128Mi"
     storage:
       volumeClaimTemplate:
         spec:

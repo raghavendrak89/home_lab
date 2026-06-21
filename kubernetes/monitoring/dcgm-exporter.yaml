@@ -31,6 +31,13 @@ spec:
               value: ":9400"
             - name: DCGM_EXPORTER_KUBERNETES
               value: "true"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           securityContext:
             runAsNonRoot: false
             runAsUser: 0
