@@ -1,0 +1,107 @@
+apiVersion: v1
+data:
+  index.html: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n
+    \ <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n
+    \ <title>Shona's Creative Space ✨</title>\n  <style>\n    * { box-sizing: border-box;
+    margin: 0; padding: 0; }\n\n    body {\n      min-height: 100vh;\n      background:
+    linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      font-family: 'Comic
+    Sans MS', 'Chalkboard SE', cursive;\n      display: flex;\n      flex-direction:
+    column;\n      align-items: center;\n      justify-content: center;\n      padding:
+    20px;\n    }\n\n    .card {\n      background: white;\n      border-radius: 30px;\n
+    \     padding: 40px;\n      max-width: 700px;\n      width: 100%;\n      box-shadow:
+    0 20px 60px rgba(0,0,0,0.3);\n      text-align: center;\n    }\n\n    h1 {\n      font-size:
+    2.5em;\n      color: #764ba2;\n      margin-bottom: 10px;\n    }\n\n    .subtitle
+    {\n      font-size: 1.2em;\n      color: #888;\n      margin-bottom: 30px;\n    }\n\n
+    \   .idea-box {\n      width: 100%;\n      min-height: 120px;\n      border: 3px
+    solid #667eea;\n      border-radius: 20px;\n      padding: 15px;\n      font-size:
+    1.3em;\n      font-family: inherit;\n      resize: none;\n      outline: none;\n
+    \     color: #333;\n      transition: border-color 0.3s;\n    }\n\n    .idea-box:focus
+    {\n      border-color: #764ba2;\n      box-shadow: 0 0 0 4px rgba(118,75,162,0.15);\n
+    \   }\n\n    .idea-box::placeholder {\n      color: #bbb;\n    }\n\n    .create-btn
+    {\n      margin-top: 25px;\n      padding: 18px 50px;\n      font-size: 1.5em;\n
+    \     font-family: inherit;\n      background: linear-gradient(135deg, #667eea,
+    #764ba2);\n      color: white;\n      border: none;\n      border-radius: 50px;\n
+    \     cursor: pointer;\n      transition: transform 0.2s, box-shadow 0.2s;\n      box-shadow:
+    0 8px 25px rgba(102,126,234,0.5);\n    }\n\n    .create-btn:hover {\n      transform:
+    translateY(-3px);\n      box-shadow: 0 12px 35px rgba(102,126,234,0.6);\n    }\n\n
+    \   .create-btn:active {\n      transform: translateY(0);\n    }\n\n    .create-btn:disabled
+    {\n      background: linear-gradient(135deg, #aaa, #ccc);\n      cursor: not-allowed;\n
+    \     transform: none;\n      box-shadow: none;\n    }\n\n    .status {\n      margin-top:
+    25px;\n      font-size: 1.2em;\n      min-height: 40px;\n      display: none;\n
+    \   }\n\n    .status.thinking {\n      color: #667eea;\n      display: block;\n
+    \   }\n\n    .status.done {\n      color: #27ae60;\n      display: block;\n    }\n\n
+    \   .status.error {\n      color: #e74c3c;\n      display: block;\n    }\n\n    .spinner
+    {\n      display: inline-block;\n      width: 20px;\n      height: 20px;\n      border:
+    3px solid #667eea;\n      border-top: 3px solid transparent;\n      border-radius:
+    50%;\n      animation: spin 0.8s linear infinite;\n      vertical-align: middle;\n
+    \     margin-right: 8px;\n    }\n\n    @keyframes spin {\n      to { transform:
+    rotate(360deg); }\n    }\n\n    .examples {\n      margin-top: 30px;\n      text-align:
+    left;\n    }\n\n    .examples h3 {\n      color: #764ba2;\n      margin-bottom:
+    12px;\n      font-size: 1em;\n    }\n\n    .example-chips {\n      display: flex;\n
+    \     flex-wrap: wrap;\n      gap: 10px;\n    }\n\n    .chip {\n      background:
+    #f0ecff;\n      color: #764ba2;\n      border: 2px solid #c9b8f5;\n      border-radius:
+    20px;\n      padding: 8px 16px;\n      font-size: 0.9em;\n      cursor: pointer;\n
+    \     font-family: inherit;\n      transition: background 0.2s;\n    }\n\n    .chip:hover
+    {\n      background: #e0d4ff;\n    }\n\n    .past-creations {\n      margin-top:
+    30px;\n      text-align: left;\n    }\n\n    .past-creations h3 {\n      color:
+    #764ba2;\n      margin-bottom: 12px;\n      font-size: 1em;\n    }\n\n    #creation-list
+    {\n      list-style: none;\n      display: flex;\n      flex-direction: column;\n
+    \     gap: 8px;\n    }\n\n    #creation-list a {\n      color: #667eea;\n      text-decoration:
+    none;\n      font-size: 1em;\n      padding: 8px 12px;\n      border-radius: 10px;\n
+    \     background: #f5f5ff;\n      display: block;\n      transition: background
+    0.2s;\n    }\n\n    #creation-list a:hover {\n      background: #ebe6ff;\n    }\n
+    \ </style>\n</head>\n<body>\n  <div class=\"card\">\n    <h1>✨ Shona's Creative
+    Space</h1>\n    <p class=\"subtitle\">Type your idea and watch the magic happen!
+    \U0001F680</p>\n\n    <textarea\n      class=\"idea-box\"\n      id=\"idea\"\n
+    \     placeholder=\"What do you want to create today? \U0001F308&#10;&#10;e.g.
+    A game where I catch falling stars ⭐\"\n    ></textarea>\n\n    <br>\n    <button
+    class=\"create-btn\" id=\"createBtn\" onclick=\"createMagic()\">\n      ✨ Create
+    Magic!\n    </button>\n\n    <div class=\"status\" id=\"status\"></div>\n\n    <div
+    class=\"examples\">\n      <h3>\U0001F4A1 Need ideas? Try one of these:</h3>\n
+    \     <div class=\"example-chips\">\n        <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F31F
+    A game where I catch falling stars</button>\n        <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F981
+    Quiz me about jungle animals</button>\n        <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F3A8
+    A drawing canvas with rainbow colours</button>\n        <button class=\"chip\"
+    onclick=\"setIdea(this)\">\U0001F9EE A talking calculator that uses emoji</button>\n
+    \       <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F9E9 A puzzle game
+    with shapes and colours</button>\n        <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F30D
+    Teach me about the solar system</button>\n        <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F4D6
+    A story where I am the hero</button>\n        <button class=\"chip\" onclick=\"setIdea(this)\">\U0001F3B5
+    A piano I can play with my keyboard</button>\n      </div>\n    </div>\n\n    <div
+    class=\"past-creations\" id=\"past-section\" style=\"display:none\">\n      <h3>\U0001F5C2️
+    Your past creations:</h3>\n      <ul id=\"creation-list\"></ul>\n    </div>\n
+    \ </div>\n\n  <script>\n    const N8N_WEBHOOK = 'http://n8n.n8n.svc.cluster.local:5678/webhook/shona-create';\n\n
+    \   function setIdea(btn) {\n      document.getElementById('idea').value = btn.textContent.slice(2).trim();\n
+    \     document.getElementById('idea').focus();\n    }\n\n    function slug(text)
+    {\n      return text.trim().replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 60);\n    }\n\n
+    \   function showStatus(type, msg) {\n      const el = document.getElementById('status');\n
+    \     el.className = 'status ' + type;\n      el.innerHTML = msg;\n    }\n\n    function
+    addToHistory(idea, filename) {\n      const list = JSON.parse(localStorage.getItem('shona-creations')
+    || '[]');\n      list.unshift({ idea, filename, date: new Date().toLocaleDateString()
+    });\n      localStorage.setItem('shona-creations', JSON.stringify(list.slice(0,
+    20)));\n      renderHistory();\n    }\n\n    function renderHistory() {\n      const
+    list = JSON.parse(localStorage.getItem('shona-creations') || '[]');\n      if
+    (list.length === 0) return;\n      document.getElementById('past-section').style.display
+    = 'block';\n      const ul = document.getElementById('creation-list');\n      ul.innerHTML
+    = list.map(item =>\n        `<li><a href=\"/${item.filename}\" target=\"_blank\">\U0001F3AE
+    ${item.idea} <small style=\"color:#aaa\">(${item.date})</small></a></li>`\n      ).join('');\n
+    \   }\n\n    async function createMagic() {\n      const idea = document.getElementById('idea').value.trim();\n
+    \     if (!idea) {\n        showStatus('error', '\U0001F4AC Please type your idea
+    first!');\n        return;\n      }\n\n      const btn = document.getElementById('createBtn');\n
+    \     btn.disabled = true;\n      const filename = slug(idea) + '.html';\n\n      showStatus('thinking',
+    '<span class=\"spinner\"></span> The AI is creating your magic... this takes about
+    2 minutes ⏳');\n\n      try {\n        const resp = await fetch('/webhook/shona-create',
+    {\n          method: 'POST',\n          headers: { 'Content-Type': 'application/json'
+    },\n          body: JSON.stringify({ idea, filename })\n        });\n\n        if
+    (resp.ok) {\n          addToHistory(idea, filename);\n          showStatus('done',
+    '\U0001F389 Done! Opening your creation...');\n          setTimeout(() => window.open('/'
+    + filename, '_blank'), 1000);\n        } else {\n          showStatus('error',
+    '\U0001F615 Something went wrong. Try again!');\n        }\n      } catch (e)
+    {\n        showStatus('error', '\U0001F615 Could not connect. Try again!');\n
+    \     }\n\n      btn.disabled = false;\n    }\n\n    document.getElementById('idea').addEventListener('keydown',
+    e => {\n      if (e.key === 'Enter' && e.ctrlKey) createMagic();\n    });\n\n
+    \   renderHistory();\n  </script>\n</body>\n</html>\n"
+kind: ConfigMap
+metadata:
+  name: shona-index
+  namespace: shona-learning

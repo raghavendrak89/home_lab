@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shona's Creative Space ✨</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 30px;
+      padding: 40px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      color: #764ba2;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .idea-box {
+      width: 100%;
+      min-height: 120px;
+      border: 3px solid #667eea;
+      border-radius: 20px;
+      padding: 15px;
+      font-size: 1.3em;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      color: #333;
+      transition: border-color 0.3s;
+    }
+
+    .idea-box:focus {
+      border-color: #764ba2;
+      box-shadow: 0 0 0 4px rgba(118,75,162,0.15);
+    }
+
+    .idea-box::placeholder {
+      color: #bbb;
+    }
+
+    .create-btn {
+      margin-top: 25px;
+      padding: 18px 50px;
+      font-size: 1.5em;
+      font-family: inherit;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 25px rgba(102,126,234,0.5);
+    }
+
+    .create-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(102,126,234,0.6);
+    }
+
+    .create-btn:active {
+      transform: translateY(0);
+    }
+
+    .create-btn:disabled {
+      background: linear-gradient(135deg, #aaa, #ccc);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .status {
+      margin-top: 25px;
+      font-size: 1.2em;
+      min-height: 40px;
+      display: none;
+    }
+
+    .status.thinking {
+      color: #667eea;
+      display: block;
+    }
+
+    .status.done {
+      color: #27ae60;
+      display: block;
+    }
+
+    .status.error {
+      color: #e74c3c;
+      display: block;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #667eea;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .examples {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .examples h3 {
+      color: #764ba2;
+      margin-bottom: 12px;
+      font-size: 1em;
+    }
+
+    .example-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      background: #f0ecff;
+      color: #764ba2;
+      border: 2px solid #c9b8f5;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.9em;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .chip:hover {
+      background: #e0d4ff;
+    }
+
+    .past-creations {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .past-creations h3 {
+      color: #764ba2;
+      margin-bottom: 12px;
+      font-size: 1em;
+    }
+
+    #creation-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #creation-list a {
+      color: #667eea;
+      text-decoration: none;
+      font-size: 1em;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #f5f5ff;
+      display: block;
+      transition: background 0.2s;
+    }
+
+    #creation-list a:hover {
+      background: #ebe6ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✨ Shona's Creative Space</h1>
+    <p class="subtitle">Type your idea and watch the magic happen! 🚀</p>
+
+    <textarea
+      class="idea-box"
+      id="idea"
+      placeholder="What do you want to create today? 🌈&#10;&#10;e.g. A game where I catch falling stars ⭐"
+    ></textarea>
+
+    <br>
+    <button class="create-btn" id="createBtn" onclick="createMagic()">
+      ✨ Create Magic!
+    </button>
+
+    <div class="status" id="status"></div>
+
+    <div class="examples">
+      <h3>💡 Need ideas? Try one of these:</h3>
+      <div class="example-chips">
+        <button class="chip" onclick="setIdea(this)">🌟 A game where I catch falling stars</button>
+        <button class="chip" onclick="setIdea(this)">🦁 Quiz me about jungle animals</button>
+        <button class="chip" onclick="setIdea(this)">🎨 A drawing canvas with rainbow colours</button>
+        <button class="chip" onclick="setIdea(this)">🧮 A talking calculator that uses emoji</button>
+        <button class="chip" onclick="setIdea(this)">🧩 A puzzle game with shapes and colours</button>
+        <button class="chip" onclick="setIdea(this)">🌍 Teach me about the solar system</button>
+        <button class="chip" onclick="setIdea(this)">📖 A story where I am the hero</button>
+        <button class="chip" onclick="setIdea(this)">🎵 A piano I can play with my keyboard</button>
+      </div>
+    </div>
+
+    <div class="past-creations" id="past-section" style="display:none">
+      <h3>🗂️ Your past creations:</h3>
+      <ul id="creation-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    const N8N_WEBHOOK = 'http://n8n.n8n.svc.cluster.local:5678/webhook/shona-create';
+
+    function setIdea(btn) {
+      document.getElementById('idea').value = btn.textContent.slice(2).trim();
+      document.getElementById('idea').focus();
+    }
+
+    function slug(text) {
+      return text.trim().replace(/[^a-zA-Z0-9]+/g, '_').slice(0, 60);
+    }
+
+    function showStatus(type, msg) {
+      const el = document.getElementById('status');
+      el.className = 'status ' + type;
+      el.innerHTML = msg;
+    }
+
+    function addToHistory(idea, filename) {
+      const list = JSON.parse(localStorage.getItem('shona-creations') || '[]');
+      list.unshift({ idea, filename, date: new Date().toLocaleDateString() });
+      localStorage.setItem('shona-creations', JSON.stringify(list.slice(0, 20)));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = JSON.parse(localStorage.getItem('shona-creations') || '[]');
+      if (list.length === 0) return;
+      document.getElementById('past-section').style.display = 'block';
+      const ul = document.getElementById('creation-list');
+      ul.innerHTML = list.map(item =>
+        `<li><a href="/${item.filename}" target="_blank">🎮 ${item.idea} <small style="color:#aaa">(${item.date})</small></a></li>`
+      ).join('');
+    }
+
+    async function createMagic() {
+      const idea = document.getElementById('idea').value.trim();
+      if (!idea) {
+        showStatus('error', '💬 Please type your idea first!');
+        return;
+      }
+
+      const btn = document.getElementById('createBtn');
+      btn.disabled = true;
+      const filename = slug(idea) + '.html';
+
+      showStatus('thinking', '<span class="spinner"></span> The AI is creating your magic... this takes about 2 minutes ⏳');
+
+      try {
+        const resp = await fetch('/webhook/shona-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idea, filename })
+        });
+
+        if (resp.ok) {
+          addToHistory(idea, filename);
+          showStatus('done', '🎉 Done! Opening your creation...');
+          setTimeout(() => window.open('/' + filename, '_blank'), 1000);
+        } else {
+          showStatus('error', '😕 Something went wrong. Try again!');
+        }
+      } catch (e) {
+        showStatus('error', '😕 Could not connect. Try again!');
+      }
+
+      btn.disabled = false;
+    }
+
+    document.getElementById('idea').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.ctrlKey) createMagic();
+    });
+
+    renderHistory();
+  </script>
+</body>
+</html>

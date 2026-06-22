@@ -30,8 +30,15 @@ data:
       autoindex_exact_size off;
       autoindex_localtime on;
 
+      # Proxy webhook calls to n8n
+      location /webhook/ {
+        proxy_pass http://n8n.n8n.svc.cluster.local:5678/webhook/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 300s;
+      }
+
       location / {
-        # Serve HTML files with correct mime type so browser renders them
         types {
           text/html html htm;
           text/css  css;
@@ -78,6 +85,14 @@ spec:
           volumeMounts:
             - name: files
               mountPath: /files
+        - name: copy-index
+          image: busybox
+          command: ["sh", "-c", "cp /index-src/index.html /files/index.html"]
+          volumeMounts:
+            - name: files
+              mountPath: /files
+            - name: index-html
+              mountPath: /index-src
       containers:
         - name: nginx
           image: nginx:alpine
@@ -103,6 +118,9 @@ spec:
         - name: config
           configMap:
             name: nginx-config
+        - name: index-html
+          configMap:
+            name: shona-index
 ---
 apiVersion: v1
 kind: Service
