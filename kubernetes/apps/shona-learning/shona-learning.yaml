@@ -1,0 +1,139 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shona-learning
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shona-files
+  namespace: shona-learning
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: shona-learning
+data:
+  default.conf: |
+    server {
+      listen 80;
+      root /files;
+      autoindex on;
+      autoindex_exact_size off;
+      autoindex_localtime on;
+
+      location / {
+        # Serve HTML files with correct mime type so browser renders them
+        types {
+          text/html html htm;
+          text/css  css;
+          application/javascript js;
+        }
+        default_type text/html;
+
+        # Allow PUT uploads from n8n
+        dav_methods PUT;
+        create_full_put_path on;
+        dav_access user:rw group:rw all:r;
+
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods "GET, PUT, OPTIONS";
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type";
+
+        if ($request_method = OPTIONS) {
+          return 204;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shona-learning
+  namespace: shona-learning
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: shona-learning
+  template:
+    metadata:
+      labels:
+        app: shona-learning
+    spec:
+      initContainers:
+        - name: fix-perms
+          image: busybox
+          command: ["sh", "-c", "chmod 777 /files"]
+          volumeMounts:
+            - name: files
+              mountPath: /files
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: files
+              mountPath: /files
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+      volumes:
+        - name: files
+          persistentVolumeClaim:
+            claimName: shona-files
+        - name: config
+          configMap:
+            name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shona-learning
+  namespace: shona-learning
+spec:
+  selector:
+    app: shona-learning
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shona-learning
+  namespace: shona-learning
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: shona.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shona-learning
+                port:
+                  number: 80
