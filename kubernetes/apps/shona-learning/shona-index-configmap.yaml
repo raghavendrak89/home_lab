@@ -94,8 +94,13 @@ data:
     {\n          method: 'POST',\n          headers: { 'Content-Type': 'application/json'
     },\n          body: JSON.stringify({ idea, filename })\n        });\n\n        if
     (resp.ok) {\n          addToHistory(idea, filename);\n          showStatus('done',
-    '\U0001F389 Done! Opening your creation...');\n          setTimeout(() => window.open('/'
-    + filename, '_blank'), 1000);\n        } else {\n          showStatus('error',
+    `\n            \U0001F389 Your creation is ready!<br><br>\n            <a href=\"/${filename}\"
+    target=\"_blank\" style=\"\n              display: inline-block;\n              margin-top:
+    10px;\n              padding: 14px 35px;\n              background: linear-gradient(135deg,
+    #27ae60, #2ecc71);\n              color: white;\n              border-radius:
+    50px;\n              text-decoration: none;\n              font-size: 1.2em;\n
+    \             box-shadow: 0 6px 20px rgba(39,174,96,0.4);\n            \">\U0001F680
+    Open my creation!</a>\n          `);\n        } else {\n          showStatus('error',
     '\U0001F615 Something went wrong. Try again!');\n        }\n      } catch (e)
     {\n        showStatus('error', '\U0001F615 Could not connect. Try again!');\n
     \     }\n\n      btn.disabled = false;\n    }\n\n    document.getElementById('idea').addEventListener('keydown',
