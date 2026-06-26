@@ -115,8 +115,14 @@ metadata:
   namespace: learning
   annotations:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    cert-manager.io/cluster-issuer: homelab-ca-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - linux.learning.home
+      secretName: linux-learning-tls
   rules:
     - host: linux.learning.home
       http:
