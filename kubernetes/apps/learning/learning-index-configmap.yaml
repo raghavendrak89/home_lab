@@ -1,0 +1,525 @@
+apiVersion: v1
+data:
+  index.html: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n
+    \ <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n
+    \ <title>Linux Learning Lab \U0001F427</title>\n  <style>\n    * { box-sizing:
+    border-box; margin: 0; padding: 0; }\n    :root {\n      --bg: #0d1117; --surface:
+    #161b22; --border: #30363d;\n      --green: #3fb950; --blue: #58a6ff; --yellow:
+    #d29922;\n      --red: #f85149; --purple: #bc8cff; --text: #e6edf3;\n      --muted:
+    #8b949e; --tbg: #010409; --pgreen: #39d353;\n    }\n    body { background:var(--bg);
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; }\n    header { background:var(--surface);
+    border-bottom:1px solid var(--border); padding:14px 24px; display:flex; align-items:center;
+    gap:16px; }\n    header h1 { font-size:1.2em; color:var(--green); white-space:nowrap;
+    }\n    .prog-bar { flex:1; height:6px; background:var(--border); border-radius:3px;
+    overflow:hidden; }\n    .prog-fill { height:100%; background:var(--green); width:0%;
+    transition:width .5s; }\n    .score-badge { background:var(--surface); border:1px
+    solid var(--border); padding:4px 12px; border-radius:20px; font-size:.85em; color:var(--yellow);
+    white-space:nowrap; }\n    .tabs { display:flex; background:var(--surface); border-bottom:1px
+    solid var(--border); padding:0 24px; }\n    .tab { padding:12px 20px; cursor:pointer;
+    font-size:.9em; color:var(--muted); border-bottom:2px solid transparent; transition:all
+    .2s; user-select:none; }\n    .tab.active { color:var(--text); border-bottom-color:var(--blue);
+    }\n    .pane { display:none; flex:1; padding:20px 24px; max-width:1100px; margin:0
+    auto; width:100%; flex-direction:column; gap:16px; }\n    .pane.active { display:flex;
+    }\n    select { background:var(--surface); border:1px solid var(--border); color:var(--text);
+    padding:7px 12px; border-radius:8px; font-size:.88em; cursor:pointer; }\n    .btn
+    { padding:7px 18px; border:none; border-radius:8px; cursor:pointer; font-size:.88em;
+    font-weight:600; transition:all .2s; }\n    .btn-g { background:var(--green);
+    color:#000; }\n    .btn-g:hover { opacity:.85; }\n    .btn-b { background:var(--blue);
+    color:#000; }\n    .btn-b:hover { opacity:.85; }\n    .btn-gh { background:transparent;
+    border:1px solid var(--border); color:var(--text); }\n    .btn-gh:hover { background:var(--border);
+    }\n    .btn:disabled { opacity:.4; cursor:not-allowed; }\n    .row { display:flex;
+    gap:10px; flex-wrap:wrap; align-items:center; }\n    .card { background:var(--surface);
+    border:1px solid var(--border); border-radius:12px; padding:20px; }\n    .tag
+    { padding:3px 9px; border-radius:12px; font-size:.72em; font-weight:700; text-transform:uppercase;
+    }\n    .tag-mod { background:#1f3a5f; color:var(--blue); }\n    .tag-easy { background:#1a3a2a;
+    color:var(--green); }\n    .tag-med  { background:#3a2a1a; color:var(--yellow);
+    }\n    .tag-hard { background:#3a1a1a; color:var(--red); }\n    #qText { font-size:1.05em;
+    line-height:1.7; margin-top:10px; }\n    #qCtx  { font-size:.83em; color:var(--muted);
+    margin-top:6px; font-style:italic; }\n    .hint { margin-top:10px; padding:9px
+    13px; background:#0d1117; border-left:3px solid var(--yellow); font-size:.83em;
+    color:var(--yellow); display:none; }\n    .ans { width:100%; background:var(--tbg);
+    border:1px solid var(--border); color:var(--text); padding:13px; border-radius:8px;
+    font-family:'Courier New',monospace; font-size:.92em; resize:vertical; min-height:110px;
+    line-height:1.55; }\n    .ans:focus { outline:none; border-color:var(--blue);
+    }\n    .res { padding:18px; border-radius:12px; border:1px solid; }\n    .res.ok
+    \ { background:#0d2a1a; border-color:var(--green); }\n    .res.mid { background:#2a2a0d;
+    border-color:var(--yellow); }\n    .res.bad { background:#2a0d0d; border-color:var(--red);
+    }\n    #resScore { font-size:1.9em; font-weight:700; margin-bottom:8px; }\n    #resExp
+    { font-size:.88em; line-height:1.75; }\n    #resExp code { background:var(--tbg);
+    padding:1px 5px; border-radius:3px; font-family:monospace; color:var(--green);
+    }\n    .term-wrap { background:var(--tbg); border-radius:12px; overflow:hidden;
+    border:1px solid var(--border); display:flex; flex-direction:column; min-height:480px;
+    }\n    .term-bar { background:#21262d; padding:9px 14px; display:flex; align-items:center;
+    gap:7px; }\n    .dot { width:11px; height:11px; border-radius:50%; }\n    .dr
+    { background:#ff5f57; } .dy { background:#febc2e; } .dg { background:#28c840;
+    }\n    .term-title { margin-left:6px; font-size:.78em; color:var(--muted); font-family:monospace;
+    }\n    .term-out { flex:1; padding:14px; font-family:'Courier New',monospace;
+    font-size:.88em; line-height:1.65; overflow-y:auto; white-space:pre-wrap; word-break:break-word;
+    }\n    .tl { margin-bottom:1px; }\n    .tp { color:var(--pgreen); }\n    .ti {
+    color:var(--blue); }\n    .tw { color:var(--yellow); }\n    .te { color:var(--red);
+    }\n    .ts { color:var(--green); }\n    .tm { color:var(--muted); }\n    .term-in-row
+    { display:flex; align-items:center; padding:7px 14px; border-top:1px solid #21262d;
+    gap:7px; }\n    .term-in-p { color:var(--pgreen); font-family:monospace; white-space:nowrap;
+    font-size:.88em; }\n    .term-in { flex:1; background:transparent; border:none;
+    color:var(--text); font-family:'Courier New',monospace; font-size:.88em; outline:none;
+    }\n    .chal { background:#1a1f2e; border:1px solid #1f3a5f; border-radius:8px;
+    padding:13px 17px; }\n    .chal h3 { color:var(--blue); font-size:.88em; margin-bottom:5px;
+    }\n    .chal p { font-size:.83em; line-height:1.5; }\n    .chal .ch { font-size:.78em;
+    color:var(--muted); margin-top:5px; }\n    .spin { display:inline-block; width:13px;
+    height:13px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%;
+    animation:sp .7s linear infinite; vertical-align:middle; margin-right:6px; }\n
+    \   @keyframes sp { to { transform:rotate(360deg); } }\n    .topics { display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }\n    .tc
+    { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:15px; cursor:pointer; transition:all .2s; }\n    .tc:hover { border-color:var(--blue);
+    background:#1f2d3d; }\n    .tc h4 { color:var(--blue); margin-bottom:5px; }\n
+    \   .tc li { font-size:.78em; color:var(--muted); margin-left:14px; margin-top:3px;
+    }\n    .tc .go { font-size:.75em; color:var(--blue); margin-top:9px; }\n  </style>\n</head>\n<body>\n<header>\n
+    \ <h1>\U0001F427 Linux Learning Lab</h1>\n  <div class=\"prog-bar\"><div class=\"prog-fill\"
+    id=\"pf\"></div></div>\n  <div class=\"score-badge\">⭐ <span id=\"pts\">0</span>
+    pts | Q: <span id=\"qct\">0</span></div>\n</header>\n<div class=\"tabs\">\n  <div
+    class=\"tab active\" onclick=\"sw('quiz')\">\U0001F4DA Quiz</div>\n  <div class=\"tab\"
+    onclick=\"sw('term')\">\U0001F4BB Terminal</div>\n  <div class=\"tab\" onclick=\"sw('topics')\">\U0001F5FA️
+    Topics</div>\n</div>\n\n<!-- QUIZ PANE -->\n<div class=\"pane active\" id=\"pane-quiz\">\n
+    \ <div class=\"row\">\n    <select id=\"mod\">\n      <option value=\"networking\">\U0001F310
+    Networking</option>\n      <option value=\"storage\">\U0001F4BE Storage &amp;
+    LVM</option>\n      <option value=\"security\">\U0001F512 Security &amp; Hardening</option>\n
+    \     <option value=\"systemd\">⚙️ systemd &amp; Processes</option>\n      <option
+    value=\"shell\">⚡ Shell &amp; Scripting</option>\n      <option value=\"random\">\U0001F3B2
+    Random</option>\n    </select>\n    <select id=\"diff\">\n      <option value=\"intermediate\">\U0001F7E1
+    Intermediate</option>\n      <option value=\"beginner\">\U0001F7E2 Beginner</option>\n
+    \     <option value=\"advanced\">\U0001F534 Advanced</option>\n    </select>\n
+    \   <button class=\"btn btn-g\" id=\"genBtn\" onclick=\"genQ()\">Generate Question
+    →</button>\n  </div>\n\n  <div class=\"card\" id=\"qCard\" style=\"display:none\">\n
+    \   <div class=\"row\" id=\"qMeta\" style=\"gap:6px\"></div>\n    <div id=\"qText\"></div>\n
+    \   <div id=\"qCtx\"></div>\n    <div class=\"hint\" id=\"hint\"></div>\n    <button
+    class=\"btn btn-gh\" style=\"margin-top:10px;font-size:.78em\" onclick=\"toggleHint()\">\U0001F4A1
+    Show hint</button>\n  </div>\n\n  <div id=\"ansWrap\" style=\"display:none\">\n
+    \   <textarea class=\"ans\" id=\"ans\" placeholder=\"Type your answer... commands,
+    explanations, examples all welcome.&#10;&#10;The more detail the better — Ollama
+    will grade and explain.\"></textarea>\n    <div class=\"row\" style=\"margin-top:9px\">\n
+    \     <button class=\"btn btn-b\" id=\"subBtn\" onclick=\"grade()\">Check Answer
+    ✓</button>\n      <button class=\"btn btn-gh\" onclick=\"genQ()\">Skip →</button>\n
+    \   </div>\n  </div>\n\n  <div id=\"resWrap\" style=\"display:none\">\n    <div
+    class=\"res\" id=\"res\">\n      <div id=\"resScore\"></div>\n      <div id=\"resExp\"></div>\n
+    \   </div>\n    <button class=\"btn btn-g\" style=\"margin-top:10px\" onclick=\"genQ()\">Next
+    Question →</button>\n  </div>\n</div>\n\n<!-- TERMINAL PANE -->\n<div class=\"pane\"
+    id=\"pane-term\">\n  <div class=\"chal\" id=\"chalBox\">\n    <h3>\U0001F3AF Challenge
+    <span id=\"chalNum\">1</span> of 12</h3>\n    <p id=\"chalText\"></p>\n    <p
+    class=\"ch\" id=\"chalHint\"></p>\n  </div>\n  <div class=\"term-wrap\">\n    <div
+    class=\"term-bar\">\n      <div class=\"dot dr\"></div><div class=\"dot dy\"></div><div
+    class=\"dot dg\"></div>\n      <span class=\"term-title\">learner@linux-lab:~</span>\n
+    \     <button class=\"btn btn-gh\" style=\"margin-left:auto;font-size:.72em;padding:3px
+    9px\" onclick=\"clrTerm()\">clear</button>\n      <button class=\"btn btn-gh\"
+    style=\"font-size:.72em;padding:3px 9px\" onclick=\"nextChal()\">Next Challenge
+    →</button>\n    </div>\n    <div class=\"term-out\" id=\"tout\"></div>\n    <div
+    class=\"term-in-row\">\n      <span class=\"term-in-p\" id=\"termPrompt\">learner@linux-lab:~$</span>\n
+    \     <input class=\"term-in\" id=\"tin\" placeholder=\"type a command...\" onkeydown=\"tkey(event)\"
+    autocomplete=\"off\" spellcheck=\"false\">\n    </div>\n  </div>\n</div>\n\n<!--
+    TOPICS PANE -->\n<div class=\"pane\" id=\"pane-topics\">\n  <h2 style=\"color:var(--blue)\">\U0001F4DA
+    Your Learning Path</h2>\n  <p style=\"color:var(--muted);font-size:.88em\">Click
+    any topic to start a quiz on it.</p>\n  <div class=\"topics\" id=\"topGrid\"></div>\n</div>\n\n<script>\n//
+    ── State ──────────────────────────────────────────────────\nlet score=0, qct=0,
+    hintOn=false, curQ=null, histIdx=-1, hist=[], cwd='/home/learner', chalIdx=0;\n\nconst
+    chals = [\n  {t:'Show all TCP ports currently listening, including which process
+    owns each port.',h:'Try: ss -tlnp'},\n  {t:'Display the routing table. What is
+    the default gateway and which interface does it use?',h:'Try: ip route show'},\n
+    \ {t:'Show all block devices and their sizes in a tree view. Identify which are
+    LVM members.',h:'Try: lsblk'},\n  {t:'Display disk usage for all mounted filesystems
+    in human-readable format.',h:'Try: df -h'},\n  {t:'Find all files with the SUID
+    permission bit set inside /usr/bin.',h:'Try: find /usr/bin -perm -4000 -type f'},\n
+    \ {t:'Show who is logged in and what they are doing right now.',h:'Try: w  or
+    \ who'},\n  {t:'Display the last 10 login records for all users.',h:'Try: last
+    -10'},\n  {t:'Show the SSH daemon service status and whether it is enabled at
+    boot.',h:'Try: systemctl status sshd'},\n  {t:'List all physical volumes, volume
+    groups, and logical volumes on this system.',h:'Try: pvs && vgs && lvs'},\n  {t:'Show
+    all currently active firewall rules in verbose format.',h:'Try: iptables -L -n
+    -v'},\n  {t:'Find files larger than 100MB, excluding other filesystem mounts.',h:'Try:
+    find / -xdev -size +100M -type f 2>/dev/null'},\n  {t:'Show the journal logs for
+    the SSH service, most recent first.',h:'Try: journalctl -u sshd -r'},\n];\n\nconst
+    topics = [\n  {icon:'\U0001F310',name:'Networking',mod:'networking',items:['ip
+    addr / ip route','ss / netstat -tulpn','DNS: dig, resolv.conf, /etc/hosts','SSH
+    keys & tunneling (-L, -R, -D)','iptables / nftables chains','tcpdump packet capture']},\n
+    \ {icon:'\U0001F4BE',name:'Storage & LVM',mod:'storage',items:['lsblk, fdisk -l,
+    parted','df -h vs du -sh','PV → VG → LV workflow','Creating & extending LVs','/etc/fstab
+    & UUID mounts','ext4, xfs, btrfs differences']},\n  {icon:'\U0001F512',name:'Security',mod:'security',items:['chmod
+    / SUID / sticky bit','sudo & /etc/sudoers','SSH hardening (sshd_config)','last,
+    lastb, w, who, auditd','fail2ban rules & jails','SELinux / AppArmor basics']},\n
+    \ {icon:'⚙️',name:'systemd',mod:'systemd',items:['Unit files & [Service] section','systemctl
+    enable/start/mask','journalctl -u / -p / --since','Timers as cron replacement','cgroup
+    resource limits','systemd-analyze blame']},\n  {icon:'⚡',name:'Shell & Scripting',mod:'shell',items:['Pipes
+    | and redirects > >>','grep -E, sed s///, awk -F','Bash functions & error handling','trap
+    for cleanup on exit','Here docs & process subs','xargs & parallel']},\n  {icon:'\U0001F50D',name:'Processes',mod:'systemd',items:['ps
+    aux, top, htop','kill signals: HUP TERM KILL','lsof -i / -p','strace -p for debugging','/proc/PID
+    internals','nice & ionice priority']},\n];\n\n// ── Simulated filesystem ───────────────────────────────────\nconst
+    FS = {\n  '/home/learner':['docs/','scripts/','.bashrc','.ssh/'],\n  '/home/learner/docs':['networking.md','lvm-notes.txt','security-checklist.md'],\n
+    \ '/home/learner/scripts':['backup.sh','monitor.sh','deploy.sh'],\n  '/home/learner/.ssh':['authorized_keys','config','id_ed25519.pub'],\n
+    \ '/etc':['passwd','hostname','hosts','resolv.conf','fstab','ssh/','sudoers','crontab','os-release'],\n
+    \ '/etc/ssh':['sshd_config','ssh_config'],\n  '/var':['log/','lib/','run/','tmp/'],\n
+    \ '/var/log':['syslog','auth.log','kern.log','dpkg.log'],\n  '/proc':['cpuinfo','meminfo','mounts','net/','sys/','1/','1234/'],\n};\nconst
+    FC = {\n  '/etc/resolv.conf':'nameserver 192.168.0.10\\nnameserver 1.1.1.1\\nsearch
+    home',\n  '/etc/hostname':'linux-lab',\n  '/etc/hosts':'127.0.0.1   localhost\\n127.0.1.1
+    \  linux-lab\\n192.168.0.201  k8s.home\\n192.168.0.10   pihole.home',\n  '/etc/fstab':'#
+    <fs>           <mp>    <type>  <opts>          <d> <p>\\nUUID=a1b2c3d4    /       ext4
+    \   defaults,noatime 0   1\\nUUID=e5f6a7b8    /boot   ext4    defaults         0
+    \  2\\n/dev/vg0/data    /data   xfs     defaults         0   2\\ntmpfs            /tmp
+    \   tmpfs   size=1G          0   0',\n  '/etc/os-release':'NAME=\"Debian GNU/Linux\"\\nVERSION=\"12
+    (bookworm)\"\\nID=debian\\nPRETTY_NAME=\"Debian GNU/Linux 12 (bookworm)\"',\n
+    \ '/home/learner/.bashrc':'export PATH=\"$HOME/scripts:$PATH\"\\nalias ll=\\'ls
+    -alh --color=auto\\'\\nalias k=\\'kubectl\\'\\nPS1=\\'\\\\[\\\\033[01;32m\\\\]\\\\u@\\\\h\\\\[\\\\033[00m\\\\]:\\\\[\\\\033[01;34m\\\\]\\\\w\\\\[\\\\033[00m\\\\]\\\\$
+    \\'',\n  '/proc/meminfo':'MemTotal:       16384000 kB\\nMemFree:         8194000
+    kB\\nMemAvailable:   10243000 kB\\nSwapTotal:       4096000 kB\\nSwapFree:        4096000
+    kB',\n  '/proc/cpuinfo':'processor\\t: 0\\nmodel name\\t: Intel(R) Core(TM) i7-12700
+    @ 2.10GHz\\ncpu cores\\t: 12\\ncache size\\t: 25600 KB',\n};\n\n// ── Command
+    Handlers ───────────────────────────────────────\nconst CMDS = {\nhelp:()=>`<span
+    class=\"ti\">Linux Lab — available commands</span>\n\n  <span class=\"ts\">Navigate:</span>
+    \ ls, cd, pwd, cat, find, grep, head, tail, wc\n  <span class=\"ts\">Network:</span>
+    \  ip addr|route|neigh, ss, netstat, ping, dig, nslookup, curl, ssh, tcpdump\n
+    \ <span class=\"ts\">Storage:</span>   df, du, lsblk, mount, blkid, fdisk, pvs,
+    vgs, lvs, lvdisplay\n  <span class=\"ts\">Security:</span>  chmod, chown, id,
+    sudo, last, lastb, who, w, find -perm, iptables, ss -tlnp\n  <span class=\"ts\">Process:</span>
+    \  ps, kill, lsof, lsmod, systemctl, journalctl, top, free, uptime\n  <span class=\"ts\">System:</span>
+    \   uname, hostname, env, date, history, clear, whoami\n\n  <span class=\"tw\">Special:</span>
+    \  <span class=\"ti\">man &lt;cmd&gt;</span>  or  <span class=\"ti\">explain &lt;topic&gt;</span>
+    \ →  Ollama explains it live\n             <span class=\"ti\">challenge</span>
+    \ →  next terminal challenge`,\n\npwd:()=>cwd,\nwhoami:()=>'learner',\nhostname:()=>'linux-lab',\ndate:()=>new
+    Date().toString(),\nid:()=>'uid=1000(learner) gid=1000(learner) groups=1000(learner),27(sudo),4(adm)',\nuname:(a)=>a.includes('-a')?'Linux
+    linux-lab 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 x86_64 GNU/Linux':a.includes('-r')?'6.1.0-21-amd64':a.includes('-n')?'linux-lab':'Linux',\nuptime:()=>`
+    ${new Date().toTimeString().slice(0,5)} up 12 days,  3:47,  2 users,  load average:
+    0.12, 0.18, 0.14`,\nfree:(a)=>a.includes('-h')?\n`              total        used
+    \       free      shared  buff/cache   available\nMem:           15Gi        4.2Gi
+    \      7.8Gi       312Mi       3.0Gi        10Gi\nSwap:         4.0Gi          0B
+    \      4.0Gi`:\n`              total        used        free      shared  buff/cache
+    \  available\nMem:        16777216     4302848     7995392      319488     2478976
+    \   10682368\nSwap:        4194304           0     4194304`,\nenv:()=>`HOME=/home/learner\\nUSER=learner\\nSHELL=/bin/bash\\nPATH=/home/learner/scripts:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\\nTERM=xterm-256color\\nLANG=en_US.UTF-8`,\nhistory:()=>hist.slice(-15).map((c,i)=>`
+    \ ${String(hist.length-14+i).padStart(3)}  ${c}`).join('\\n'),\necho:(a)=>a.replace(/^[\"']|[\"']$/g,''),\nclear:()=>{clrTerm();return
+    null;},\nexit:()=>`<span class=\"tw\">You can't exit the lab! Keep learning \U0001F427</span>`,\n\nls:(a)=>{\n
+    \ const long=a.match(/-[a-z]*l/)||a.includes('--long');\n  const all=a.match(/-[a-z]*a/);\n
+    \ const parts=a.trim().split(/\\s+/).filter(p=>!p.startsWith('-'));\n  let dir=cwd;\n
+    \ if(parts.length&&parts[0]){dir=parts[0].startsWith('/')?parts[0]:cwd+'/'+parts[0];}\n
+    \ dir=dir.replace(/\\/+/g,'/').replace(/\\/$/,'')||'/';\n  const ent=FS[dir]||FS[cwd]||[];\n
+    \ if(long){return ent.map(e=>{const d=e.endsWith('/');const n=e.replace('/','');return`${d?'drwxr-xr-x':'-rw-r--r--'}
+    1 learner learner ${d?'4096':String(~~(Math.random()*8000+500)).padStart(5)} Jun
+    18 10:00 <span class=\"${d?'ti':''}\">${n}</span>`;}).join('\\n');}\n  return
+    ent.map(e=>{const d=e.endsWith('/');const n=e.replace('/','');return d?`<span
+    class=\"ti\">${n}/</span>`:n;}).join('  ');\n},\n\ncd:(a)=>{const t=a.trim()||'/home/learner';cwd=(t.startsWith('/')?t:cwd+'/'+t).replace(/\\/+/g,'/').replace(/\\/$/,'')||'/';document.getElementById('termPrompt').textContent=`learner@linux-lab:${cwd}$`;return
+    '';},\n\ncat:(a)=>{\n  const p=(a.trim().startsWith('/')?a.trim():cwd+'/'+a.trim()).replace(/\\/+/g,'/');\n
+    \ if(p.includes('shadow'))return`<span class=\"te\">cat: /etc/shadow: Permission
+    denied</span>`;\n  if(p.includes('sudoers')&&!a.startsWith('sudo'))return`<span
+    class=\"te\">cat: /etc/sudoers: Permission denied</span>`;\n  return FC[p]||`<span
+    class=\"te\">cat: ${esc(a.trim())}: No such file or directory</span>`;\n},\n\nhead:(a)=>{const
+    p=a.trim().split(/\\s+/).filter(x=>!x.startsWith('-')).pop()||'';const fp=(p.startsWith('/')?p:cwd+'/'+p).replace(/\\/+/g,'/');const
+    c=FC[fp];if(!c)return`<span class=\"te\">head: ${esc(p)}: No such file or directory</span>`;const
+    n=parseInt((a.match(/-n\\s*(\\d+)/)||[,'5'])[1]);return c.split('\\n').slice(0,n).join('\\n');},\n\ntail:(a)=>{const
+    p=a.trim().split(/\\s+/).filter(x=>!x.startsWith('-')).pop()||'';const fp=(p.startsWith('/')?p:cwd+'/'+p).replace(/\\/+/g,'/');const
+    c=FC[fp];if(!c)return`<span class=\"te\">tail: ${esc(p)}: No such file or directory</span>`;const
+    n=parseInt((a.match(/-n\\s*(\\d+)/)||[,'5'])[1]);const lines=c.split('\\n');return
+    lines.slice(-n).join('\\n');},\n\n// ── Networking ──────────────────────────────────────────────\nip:(a)=>{\n
+    \ if(a.match(/^a(ddr)?(\\s|$)/)||a===''||a==='-br')return`1: <span class=\"ts\">lo</span>:
+    &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 state UNKNOWN\n    link/loopback 00:00:00:00:00:00\n
+    \   inet 127.0.0.1/8 scope host lo\n2: <span class=\"ts\">eth0</span>: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;
+    mtu 1500 state UP\n    link/ether 52:54:00:ab:cd:ef\n    inet <span class=\"tw\">192.168.0.100/24</span>
+    brd 192.168.0.255 scope global dynamic eth0\n    inet6 fe80::5054:ff:feab:cdef/64
+    scope link`;\n  if(a.match(/^r(oute)?/))return`default via <span class=\"ts\">192.168.0.1</span>
+    dev eth0 proto dhcp src 192.168.0.100 metric 100\n192.168.0.0/24 dev eth0 proto
+    kernel scope link src 192.168.0.100`;\n  if(a.match(/^l(ink)?/))return`1: lo:
+    &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 state UNKNOWN\n2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;
+    mtu 1500 state UP`;\n  if(a.match(/^n(eigh)?/))return`192.168.0.1 dev eth0 lladdr
+    aa:bb:cc:dd:ee:ff REACHABLE\n192.168.0.10 dev eth0 lladdr 11:22:33:44:55:66 STALE`;\n
+    \ return`<span class=\"te\">ip: unknown object: ${esc(a)}</span>\\nUsage: ip addr
+    | ip route | ip link | ip neigh`;\n},\n\nifconfig:()=>`<span class=\"tw\">ifconfig
+    is deprecated — use 'ip addr' instead</span>\neth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;
+    \ mtu 1500\n      inet 192.168.0.100  netmask 255.255.255.0  broadcast 192.168.0.255\nlo:
+    \  flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536\n      inet 127.0.0.1  netmask
+    255.0.0.0`,\n\nss:(a)=>`Netid  State    Recv-Q  Send-Q   Local Address:Port     Peer
+    Address:Port  Process\n<span class=\"ts\">tcp</span>    LISTEN   0       128      0.0.0.0:<span
+    class=\"tw\">22</span>            0.0.0.0:*          users:((\"sshd\",pid=842,fd=3))\n<span
+    class=\"ts\">tcp</span>    LISTEN   0       511      127.0.0.1:<span class=\"tw\">6443</span>
+    \         0.0.0.0:*          users:((\"kube-apiserver\",pid=1203))\n<span class=\"ts\">tcp</span>
+    \   LISTEN   0       128      0.0.0.0:<span class=\"tw\">80</span>            0.0.0.0:*
+    \         users:((\"nginx\",pid=2341,fd=6))\n<span class=\"ts\">tcp</span>    LISTEN
+    \  0       128      0.0.0.0:<span class=\"tw\">443</span>           0.0.0.0:*
+    \         users:((\"nginx\",pid=2341,fd=7))\n<span class=\"ts\">udp</span>    UNCONN
+    \  0       0        0.0.0.0:<span class=\"tw\">53</span>            0.0.0.0:*
+    \         users:((\"dnsmasq\",pid=1102))`,\n\nnetstat:(a)=>`<span class=\"tw\">netstat
+    is deprecated — use 'ss' instead</span>\nActive Internet connections (only servers)\nProto
+    \ Local Address      Foreign Address  State   PID/Program\ntcp    0.0.0.0:22         0.0.0.0:*
+    \       LISTEN  842/sshd\ntcp    127.0.0.1:6443     0.0.0.0:*        LISTEN  1203/kube-apiserver\ntcp
+    \   0.0.0.0:80         0.0.0.0:*        LISTEN  2341/nginx\nudp    0.0.0.0:53
+    \        0.0.0.0:*                1102/dnsmasq`,\n\nping:(a)=>{const h=a.trim().split(/\\s+/).filter(p=>!p.startsWith('-'))[0]||'localhost';const
+    c=parseInt((a.match(/-c\\s*(\\d+)/)||[,'4'])[1]);let o=`PING ${h} (192.168.0.1):
+    56 bytes of data\\n`;for(let i=0;i<Math.min(c,4);i++){o+=`64 bytes from ${h}:
+    icmp_seq=${i+1} ttl=64 time=${(Math.random()*2+0.5).toFixed(2)} ms\\n`;}o+=`\\n---
+    ${h} ping statistics ---\\n${c} packets transmitted, ${c} received, 0% packet
+    loss`;return o;},\n\ndig:(a)=>{const d=a.trim().split(/\\s+/).filter(p=>!p.startsWith('-')&&!p.startsWith('@'))[0]||'example.com';return`;;
+    ANSWER SECTION:\\n${d}.  300 IN A  93.184.216.34\\n\\n;; Query time: 18 msec\\n;;
+    SERVER: 192.168.0.10#53`;},\n\nnslookup:(a)=>{const d=a.trim().split(/\\s+/)[0]||'example.com';return`Server:
+    192.168.0.10\\nAddress: 192.168.0.10#53\\n\\nName: ${d}\\nAddress: 93.184.216.34`;},\n\ncurl:(a)=>a.includes('-I')||a.includes('--head')?`HTTP/2
+    200\\ncontent-type: text/html\\nserver: nginx/1.24.0\\nx-frame-options: SAMEORIGIN`:`<span
+    class=\"tw\">[simulated]</span> curl ${esc(a)}\\nFlags: -I (headers), -L (follow
+    redirects), -o &lt;file&gt;, -u user:pass, -k (ignore SSL), -s (silent)`,\n\nssh:(a)=>`<span
+    class=\"tw\">[simulated]</span> ssh ${esc(a)}\\nKey flags: -i identity_file, -p
+    port, -L local_port:host:remote_port (local tunnel)\\n          -R remote_port:host:local_port
+    (remote tunnel), -N (no shell, tunnel only), -J jump_host`,\n\ntcpdump:(a)=>`<span
+    class=\"tw\">[simulated - needs root]</span>\nCommon usage:\n  tcpdump -i eth0
+    \                    capture all traffic on eth0\n  tcpdump -i eth0 port 443            filter
+    HTTPS only\n  tcpdump -i eth0 host 1.2.3.4        filter by host\n  tcpdump -i
+    eth0 -w cap.pcap         write to file (open with Wireshark)\n  tcpdump -r cap.pcap
+    \                read from file\n  tcpdump -nn -i any                  no name
+    resolution (-nn)`,\n\niptables:(a)=>a.includes('-L')||!a.trim()?\n`Chain INPUT
+    (policy ACCEPT)\ntarget     prot  source          destination\nACCEPT     all
+    \  anywhere        anywhere      state RELATED,ESTABLISHED\nACCEPT     icmp  anywhere
+    \       anywhere\nACCEPT     all   anywhere        anywhere\nACCEPT     tcp   anywhere
+    \       anywhere      state NEW tcp dpt:ssh\nREJECT     all   anywhere        anywhere
+    \     reject-with icmp-host-prohibited\nChain FORWARD (policy DROP)\nChain OUTPUT
+    (policy ACCEPT)`:\n`<span class=\"tw\">[simulated]</span> iptables ${esc(a)}\\nUse:
+    -L (list), -A INPUT (append), -D INPUT 1 (delete), -F (flush), -P INPUT DROP (policy)`,\n\nnft:(a)=>a.includes('list')?\n`table
+    inet filter {\n  chain input {\n    type filter hook input priority 0; policy
+    drop;\n    ct state established,related accept\n    iif lo accept\n    tcp dport
+    22 accept\n    tcp dport { 80, 443 } accept\n    drop\n  }\n}`:\n`<span class=\"tw\">[simulated]</span>
+    nft ${esc(a)}\\nModern replacement for iptables. Use: nft list ruleset | nft add
+    rule ...`,\n\n// ── Storage ─────────────────────────────────────────────────\ndf:(a)=>a.includes('-h')?\n`Filesystem
+    \          Size  Used Avail Use% Mounted on\n/dev/mapper/vg0-root  49G   12G   34G
+    \ 27% /\n/dev/sda1            974M  211M  697M  24% /boot\n/dev/mapper/vg0-data
+    197G   45G  152G  23% /data\ntmpfs                7.8G     0  7.8G   0% /dev/shm`:\n`Filesystem
+    \             1K-blocks    Used Available Use% Mounted on\n/dev/mapper/vg0-root
+    \    51348480 12582912  38765568  25% /\n/dev/sda1                  998544   216064
+    \   713680  24% /boot\n/dev/mapper/vg0-data    206388224 47185920 159202304  23%
+    /data`,\n\ndu:(a)=>{const p=a.trim().split(/\\s+/).filter(x=>!x.startsWith('-')).pop()||cwd;const
+    h=a.includes('-h');return[`${h?'28K':'28672'}\\t${p}/scripts`,`${h?'12K':'12288'}\\t${p}/docs`,`${h?'4.0K':'4096'}\\t${p}/.ssh`,`${h?'48K':'49152'}\\t${p}`].join('\\n');},\n\nlsblk:(a)=>`NAME
+    \          MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINTS\n<span class=\"ti\">sda</span>
+    \             8:0    0    50G  0 disk\n├─<span class=\"ti\">sda1</span>           8:1
+    \   0     1G  0 part  /boot\n└─<span class=\"ti\">sda2</span>           8:2    0
+    \   49G  0 part\n  └─<span class=\"ts\">vg0-root</span>   253:0    0    49G  0
+    lvm   /\n<span class=\"ti\">sdb</span>              8:16   0   200G  0 disk\n└─<span
+    class=\"ti\">sdb1</span>           8:17   0   200G  0 part\n  └─<span class=\"ts\">vg0-data</span>
+    \  253:1    0   200G  0 lvm   /data`,\n\nblkid:()=>`/dev/sda1: UUID=\"1a2b3c4d-0001-0001-0001-000000000001\"
+    TYPE=\"ext4\"\n/dev/sda2: UUID=\"2b3c4d5e-0002-0002-0002-000000000002\" TYPE=\"LVM2_member\"\n/dev/sdb1:
+    UUID=\"3c4d5e6f-0003-0003-0003-000000000003\" TYPE=\"LVM2_member\"\n/dev/mapper/vg0-root:
+    UUID=\"4d5e6f7a-0004-0004-0004-000000000004\" TYPE=\"ext4\"\n/dev/mapper/vg0-data:
+    UUID=\"5e6f7a8b-0005-0005-0005-000000000005\" TYPE=\"xfs\"`,\n\nfdisk:(a)=>a.includes('-l')?\n`Disk
+    /dev/sda: 50 GiB  (53687091200 bytes)\nDevice     Boot   Start      End  Sectors
+    Size Type\n/dev/sda1  *       2048  2099199  2097152   1G Linux filesystem\n/dev/sda2
+    \      2099200 104857599 102758400  49G Linux LVM\n\nDisk /dev/sdb: 200 GiB\nDevice
+    \    Boot Start       End   Sectors Size Type\n/dev/sdb1        2048 419430399
+    419428352  200G Linux LVM`:\n`<span class=\"tw\">[simulated]</span> Use fdisk
+    -l to list partition tables. fdisk &lt;device&gt; opens interactive mode.`,\n\nmount:(a)=>!a.trim()?\n`sysfs
+    on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)\nproc on /proc type proc
+    (rw,nosuid,nodev,noexec,relatime)\n/dev/mapper/vg0-root on / type ext4 (rw,relatime,errors=remount-ro)\n/dev/sda1
+    on /boot type ext4 (rw,relatime)\ntmpfs on /tmp type tmpfs (rw,nosuid,nodev,size=1048576k)\n/dev/mapper/vg0-data
+    on /data type xfs (rw,relatime,attr2,inode64)`:\n`<span class=\"tw\">[simulated]</span>
+    mount ${esc(a)}`,\n\npvs:()=>`  PV         VG   Fmt  Attr PSize    PFree\n  /dev/sda2
+    \ vg0  lvm2 a--   <49.00g    0\n  /dev/sdb1  vg0  lvm2 a--  <200.00g    0`,\n\npvdisplay:()=>`
+    \ --- Physical volume ---\n  PV Name     /dev/sda2      VG Name  vg0\n  PV Size
+    \    49.00 GiB      Total PE 12543    Allocated PE 12543\n  --- Physical volume
+    ---\n  PV Name     /dev/sdb1      VG Name  vg0\n  PV Size     200.00 GiB     Total
+    PE 51199    Allocated PE 51199`,\n\nvgs:()=>`  VG   #PV #LV #SN Attr   VSize    VFree\n
+    \ vg0    2   2   0 wz--n- <249.00g    0`,\n\nvgdisplay:()=>`  --- Volume group
+    ---\n  VG Name     vg0         Format  lvm2\n  VG Size     <249.00 GiB  PE Size
+    \ 4.00 MiB\n  Total PE    63742         Alloc PE 63742    Free PE 0`,\n\nlvs:()=>`
+    \ LV    VG   Attr       LSize\n  data  vg0  -wi-ao---- 200.00g\n  root  vg0  -wi-ao----
+    \ 49.00g`,\n\nlvdisplay:()=>`  --- Logical volume ---\n  LV Path   /dev/vg0/root
+    \  LV Name root   VG Name vg0\n  LV Size   49.00 GiB       LV Status available
+    \  Block device 253:0\n  --- Logical volume ---\n  LV Path   /dev/vg0/data   LV
+    Name data   VG Name vg0\n  LV Size   200.00 GiB      LV Status available   Block
+    device 253:1`,\n\nlvm:(a)=>`LVM chain: pvcreate → vgcreate → lvcreate → mkfs →
+    mount\n  pvcreate /dev/sdc            initialize disk as PV\n  vgcreate myvg /dev/sdc
+    \      create volume group\n  lvcreate -L 50G -n mydata myvg  create 50G LV\n
+    \ mkfs.xfs /dev/myvg/mydata   format as XFS\n  mount /dev/myvg/mydata /mnt  mount
+    it`,\n\n// ── Security ────────────────────────────────────────────────\nchmod:(a)=>`<span
+    class=\"ts\">chmod ${esc(a)}</span>\nUnderstanding permissions:\n  Numeric: 4=read
+    2=write 1=execute  →  755 = rwxr-xr-x\n  Symbolic: u=user g=group o=other a=all\n
+    \ Examples:  chmod 600 ~/.ssh/id_rsa     (owner read/write only)\n             chmod
+    755 /usr/bin/script   (executable by all)\n             chmod u+x script.sh         (add
+    execute for owner)\n             chmod go-w file             (remove write from
+    group/other)\n  Special:   chmod +s (SUID)  chmod +t (sticky bit on dir)`,\n\nchown:(a)=>`<span
+    class=\"ts\">chown ${esc(a)}</span>\n  chown user:group file     change both owner
+    and group\n  chown -R www-data:www-data /var/www  recursive\n  chgrp group file
+    \         change group only`,\n\nid:()=>`uid=1000(learner) gid=1000(learner) groups=1000(learner),27(sudo),4(adm)`,\n\nsudo:(a)=>a.includes('-l')?\n`Matching
+    Defaults entries for learner on linux-lab:\n    env_reset, mail_badpass, secure_path=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n\nUser
+    learner may run the following commands on linux-lab:\n    (ALL : ALL) ALL`:\n`<span
+    class=\"tw\">[sudo]</span> password for learner: ********\\n(command would run
+    as root)`,\n\nlast:(a)=>`learner  pts/0  192.168.0.50  Thu Jun 26 10:15   still
+    logged in\nlearner  pts/1  192.168.0.50  Wed Jun 25 21:30 - 23:10  (01:40)\nroot
+    \    tty1                 Mon Jun 23 08:00 - 08:14  (00:14)\nreboot   system boot
+    \         Fri Jun  7 09:00\nwtmp begins Fri Jun  7 09:00:00 2024`,\n\nlastb:()=>`learner
+    \ ssh:notty  192.168.1.200  Jun 25 03:12 - 03:12  (00:00)  <-- failed\nlearner
+    \ ssh:notty  192.168.1.200  Jun 25 03:11 - 03:11  (00:00)  <-- failed\nroot     ssh:notty
+    \ 10.0.0.5       Jun 24 22:40 - 22:40  (00:00)  <-- failed\n<span class=\"tw\">Tip:
+    Install fail2ban to block IPs with repeated failures</span>`,\n\nwho:()=>`learner
+    \ pts/0        2024-06-26 10:15 (192.168.0.50)`,\n\nw:()=>` 10:20:01 up 12 days,
+    \ 3:47,  1 user,  load average: 0.12, 0.18, 0.14\nUSER     TTY   FROM            LOGIN@
+    \  IDLE JCPU PCPU WHAT\nlearner  pts/0 192.168.0.50   10:15   0.00s 0.12s 0.01s
+    w`,\n\npasswd:(a)=>`Changing password for ${a.trim()||'learner'}.\\nNew password:\\nRetype
+    new password:\\npasswd: password updated successfully`,\n\nuseradd:(a)=>`<span
+    class=\"ts\">User created.</span> To set password: passwd ${a.replace(/^-\\S+\\s*/g,'').trim()}`,\n\n//
+    ── Processes ───────────────────────────────────────────────\nps:(a)=>a.includes('aux')||a.includes('ax')?\n`USER
+    \      PID %CPU %MEM    VSZ   RSS STAT START   TIME COMMAND\nroot         1  0.0
+    \ 0.1  169228 11264 Ss   Jun07   0:08 /sbin/init\nroot       842  0.0  0.1   15988
+    \ 7680 Ss   Jun07   0:00 /usr/sbin/sshd -D\nroot      1203  1.2  3.4 1234567 567890
+    Ssl Jun07  48:22 kube-apiserver\nnginx     2341  0.0  0.1   55632  4096 Ss   Jun07
+    \  0:01 nginx: master process\nlearner   5432  0.0  0.0   22016  3200 Ss   10:15
+    \  0:00 bash\nlearner   5678  0.0  0.0    7672  1024 R+   10:20   0:00 ps aux`:\n`
+    \   PID TTY      TIME CMD\\n   5432 pts/0   00:00:00 bash\\n   5678 pts/0   00:00:00
+    ps`,\n\ntop:()=>`<span class=\"tw\">[interactive - not supported in simulator]</span>\ntop
+    - 10:20:01 up 12 days,  3:47,  load average: 0.12, 0.18, 0.14\nTasks: 128 total,
+    \  1 running, 127 sleeping\n%Cpu(s):  1.2 us,  0.3 sy,  0.0 ni, 98.3 id\nMiB Mem
+    :  15360.0 total,   7800.0 free,   4100.0 used\n  PID USER  PR  NI  VIRT   RES
+    \ SHR S %CPU %MEM  TIME+ COMMAND\n 1203 root  20   0 1.2g  568m  12m S  1.2  3.7
+    \ 48:22 kube-apiserver\n\n<span class=\"ti\">Real top shortcuts: q=quit  k=kill
+    \ M=sort by mem  P=sort by CPU  1=per-cpu cores</span>`,\n\nkill:(a)=>a.includes('-l')?\n`1)
+    SIGHUP   2) SIGINT   3) SIGQUIT  9) SIGKILL  15) SIGTERM\n18) SIGCONT 19) SIGSTOP
+    \ 20) SIGTSTP`:\n`<span class=\"tw\">[simulated]</span>\nkill -9 PID   SIGKILL
+    (force, no cleanup)\nkill -15 PID  SIGTERM (graceful, default)\nkill -1 PID   SIGHUP
+    \ (reload config — e.g. sshd)\nkill -19 PID  SIGSTOP (pause)  kill -18 PID  SIGCONT
+    (resume)`,\n\nlsof:(a)=>a.includes('-i')?\n`COMMAND   PID   USER  FD  TYPE DEVICE
+    NODE NAME\nsshd      842   root   3u IPv4  12345      TCP *:ssh (LISTEN)\nnginx
+    \   2341  nginx   6u IPv4  23456      TCP *:http (LISTEN)\nnginx    2341  nginx
+    \  7u IPv4  23457      TCP *:https (LISTEN)`:\n`<span class=\"tw\">[simulated]</span>
+    lsof ${esc(a)}\\nUseful: lsof -i :80 (who uses port 80), lsof -p PID (files open
+    by process), lsof /var/log/syslog`,\n\nlsmod:()=>`Module                  Size
+    \ Used by\nnf_conntrack          172032  3 nft_ct,xt_conntrack,nf_nat\nnf_nat
+    \                49152  2 nft_chain_nat,xt_MASQUERADE\nbr_netfilter           32768
+    \ 0\noverlay                151552  4\next4                  970752  2\nxfs                  1490944
+    \ 1\ndm_mod                196608  8 dm_mirror,dm_log,lvm2\nvirtio_blk             20480
+    \ 3`,\n\nsystemctl:(a)=>{\n  if(a.match(/status ssh/))return`● ssh.service - OpenBSD
+    Secure Shell server\n     Loaded: loaded (/lib/systemd/system/ssh.service; <span
+    class=\"ts\">enabled</span>)\n     Active: <span class=\"ts\">active (running)</span>
+    since Fri 2024-06-07 09:00:03 UTC; 19 days ago\n    Process: 840 ExecStartPre=/usr/sbin/sshd
+    -t (code=exited, status=0/SUCCESS)\n   Main PID: 842 (sshd)\n     CGroup: /system.slice/ssh.service\n
+    \            └─842 \"sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups\"`;\n
+    \ if(a.match(/status nginx/))return`● nginx.service - nginx web server\n     Loaded:
+    loaded (/lib/systemd/system/nginx.service; <span class=\"ts\">enabled</span>)\n
+    \    Active: <span class=\"ts\">active (running)</span> since Fri 2024-06-07 09:00:10
+    UTC; 19 days ago\n   Main PID: 2341 (nginx)\n     CGroup: /system.slice/nginx.service\n
+    \            ├─2341 nginx: master process\n             └─2342 nginx: worker process`;\n
+    \ if(a.includes('list-units'))return`  UNIT                       ACTIVE  DESCRIPTION\n
+    \ cron.service               active  Regular background program\n  dbus.service
+    \              active  D-Bus System Message Bus\n  networking.service         active
+    \ Raise network interfaces\n  nginx.service              active  nginx web server\n
+    \ ssh.service                active  OpenBSD Secure Shell server\n  systemd-journald.service
+    \  active  Journal Service`;\n  if(a.includes('list-timers'))return`NEXT                         LEFT
+    \    UNIT\nThu 2024-06-27 00:00:00 UTC  13h left logrotate.timer\nThu 2024-06-27
+    06:00:00 UTC  19h left apt-daily.timer`;\n  return`<span class=\"tw\">[simulated]</span>
+    systemctl ${esc(a)}\\nCommon: status|start|stop|restart|enable|disable|reload|mask|list-units|list-timers`;\n},\n\njournalctl:(a)=>{\n
+    \ if(a.match(/-u\\s*(ssh|sshd)/))return`Jun 07 09:00:03 linux-lab sshd[842]: Server
+    listening on 0.0.0.0 port 22.\nJun 07 09:00:03 linux-lab sshd[842]: Server listening
+    on :: port 22.\nJun 26 10:15:22 linux-lab sshd[5401]: Accepted publickey for learner
+    from 192.168.0.50 port 54321 ssh2\nJun 26 10:15:22 linux-lab sshd[5401]: pam_unix(sshd:session):
+    session opened for user learner`;\n  if(a.includes('-p err')||a.includes('-p 3'))return`<span
+    class=\"te\">Jun 15 02:30:01 linux-lab kernel: EXT4-fs error (device sda1): bg
+    block bitmap mismatch</span>\n<span class=\"te\">Jun 16 14:22:11 linux-lab systemd[1]:
+    nginx.service: Start request repeated too quickly.</span>`;\n  return`-- Logs
+    begin at Fri 2024-06-07 09:00:00 UTC --\nJun 26 10:15:22 linux-lab sshd[5401]:
+    Accepted publickey for learner\nJun 26 10:18:03 linux-lab sudo[5500]: learner
+    : COMMAND=/usr/bin/apt update\nJun 26 10:20:00 linux-lab systemd[1]: Started session-3.scope\n<span
+    class=\"ti\">Flags: -u unit, -f follow, -r reverse, -p err|warn, --since \"1 hour
+    ago\", -n 50</span>`;\n},\n\n// ── Find / grep ─────────────────────────────────────────────\nfind:(a)=>{\n
+    \ if(a.includes('-perm'))return`/usr/bin/sudo\\n/usr/bin/passwd\\n/usr/bin/su\\n/usr/bin/newgrp\\n/usr/bin/gpasswd\\n/usr/bin/mount\\n/usr/bin/umount\\n<span
+    class=\"ti\">These files run as root regardless of who executes them (SUID bit)</span>`;\n
+    \ if(a.includes('-size'))return`/var/lib/docker/overlay2/abc123/merged/usr/lib/jvm/classes.jsa
+    (234M)\\n/var/log/journal/system.journal (156M)`;\n  if(a.includes('-mtime'))return`/var/log/syslog\\n/var/log/auth.log\\n/var/log/kern.log\\n/home/learner/scripts/backup.sh`;\n
+    \ return`<span class=\"tw\">[simulated]</span> find ${esc(a)}\\nCommon patterns:\\n
+    \ find /etc -name \"*.conf\" -type f\\n  find / -perm -4000 -type f 2>/dev/null\\n
+    \ find /var/log -mtime -7 -type f\\n  find / -xdev -size +100M 2>/dev/null`;\n},\n\ngrep:(a)=>{\n
+    \ if(a.includes('/etc/passwd'))return`root:x:0:0:root:/root:/bin/bash\\nlearner:x:1000:1000::/home/learner:/bin/bash\\nnginx:x:33:33:www-data:/var/www:/usr/sbin/nologin`;\n
+    \ return`<span class=\"tw\">[simulated]</span> grep ${esc(a)}\\nFlags: -r recursive,
+    -i case-insensitive, -n line numbers, -l filenames only, -v invert, -E extended
+    regex`;\n},\n\nsed:(a)=>`<span class=\"tw\">[simulated]</span> sed ${esc(a)}\\n
+    \ sed 's/old/new/g' file         substitute all\\n  sed -n '10,20p' file           print
+    lines 10-20\\n  sed '/pattern/d' file          delete matching lines\\n  sed -i.bak
+    's/old/new/g' file  edit in-place (backup as .bak)`,\n\nawk:(a)=>`<span class=\"tw\">[simulated]</span>
+    awk ${esc(a)}\\n  awk '{print $1}' file          print 1st column\\n  awk -F:
+    '{print $1}' /etc/passwd  colon delimiter\\n  awk '$3 > 1000' file           conditional
+    filter\\n  awk 'END{print NR}' file       count lines`,\n\nwc:(a)=>`<span class=\"tw\">[simulated]</span>
+    wc ${esc(a)}\\n  wc -l (lines)  wc -w (words)  wc -c (bytes)\\n  Example: cat
+    /var/log/auth.log | grep Failed | wc -l`,\n\n// ── Challenge trigger ───────────────────────────────────────\nchallenge:()=>{nextChal();return''},\n};\n\n//
+    ── Terminal engine ────────────────────────────────────────\nfunction tOut(html){const
+    d=document.getElementById('tout');const l=document.createElement('div');l.className='tl';l.innerHTML=html;d.appendChild(l);d.scrollTop=d.scrollHeight;}\n\nfunction
+    esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}\n\nfunction
+    initTerm(){tOut(`<span class=\"ts\">Welcome to Linux Learning Lab \U0001F427</span>\nType
+    <span class=\"ti\">help</span> to list commands  •  <span class=\"ti\">man &lt;cmd&gt;</span>
+    for Ollama explanations  •  <span class=\"ti\">challenge</span> for next task\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n`);}\n\nfunction
+    tkey(e){\n  const inp=document.getElementById('tin');\n  if(e.key==='Enter'){\n
+    \   const cmd=inp.value.trim();if(!cmd)return;\n    hist.push(cmd);histIdx=hist.length;inp.value='';\n
+    \   tOut(`<span class=\"tp\">learner@linux-lab:${cwd}$</span> <span style=\"color:var(--text)\">${esc(cmd)}</span>`);\n
+    \   runCmd(cmd);\n  }\n  if(e.key==='ArrowUp'){e.preventDefault();if(histIdx>0){histIdx--;inp.value=hist[histIdx]||'';}}\n
+    \ if(e.key==='ArrowDown'){e.preventDefault();if(histIdx<hist.length-1){histIdx++;inp.value=hist[histIdx];}else{histIdx=hist.length;inp.value='';}}\n
+    \ if(e.key==='Tab'){\n    e.preventDefault();\n    const v=inp.value,parts=v.split('
+    ');\n    if(parts.length===1){const m=Object.keys(CMDS).filter(c=>c.startsWith(v));if(m.length===1){inp.value=m[0]+'
+    ';}else if(m.length>1){tOut(m.join('  '));}}\n  }\n}\n\nasync function runCmd(full){\n
+    \ if(full.includes('|')){tOut(`<span class=\"tw\">[pipe simulated]</span> ${esc(full)}\\nPipes
+    work in real Linux! Try each sub-command individually.`);return;}\n  if(full.match(/[><]/)){tOut(`<span
+    class=\"tw\">[redirect simulated]</span> ${esc(full)}\\n> overwrites  >> appends
+    \ < reads stdin  2> captures stderr  2>&1 merges stderr into stdout`);return;}\n\n
+    \ const parts=full.trim().split(/\\s+/),cmd=parts[0].toLowerCase(),args=parts.slice(1).join('
+    ');\n\n  if(cmd==='man'||cmd==='explain'){await ollamaExplain(args||cmd,cmd==='man');return;}\n\n
+    \ const editors=['vim','vi','nano','emacs'];\n  if(editors.includes(cmd)){tOut(`<span
+    class=\"tw\">[${cmd} requires interactive terminal]</span>\\nvim tips: i=insert
+    mode, Esc=normal mode, :wq=save+quit, :q!=discard, /pattern=search\\nnano tips:
+    Ctrl+O=save, Ctrl+X=exit, Ctrl+W=search`);return;}\n\n  if(CMDS[cmd]){\n    const
+    r=CMDS[cmd](args);\n    if(r!==null&&r!==undefined&&r!=='')tOut(r);\n  }else if(cmd.startsWith('apt')||cmd.startsWith('dnf')||cmd.startsWith('yum')){\n
+    \   tOut(`<span class=\"tw\">[simulated]</span> ${esc(full)}\\napt: Debian/Ubuntu
+    \ |  dnf: RHEL/Fedora  |  pacman: Arch\\nCommon: install, remove, update, upgrade,
+    search, show, list --installed`);\n  }else{\n    tOut(`<span class=\"te\">bash:
+    ${esc(cmd)}: command not found</span>\\nType <span class=\"ti\">help</span> to
+    see available commands, or <span class=\"ti\">explain ${esc(cmd)}</span> to learn
+    about it.`);\n  }\n}\n\nasync function ollamaExplain(cmd,isMan){\n  const el=document.createElement('div');el.className='tl';\n
+    \ el.innerHTML=`<span class=\"ti\"><span class=\"spin\"></span>Asking Ollama about
+    '${esc(cmd)}'...</span>`;\n  document.getElementById('tout').appendChild(el);\n
+    \ document.getElementById('tout').scrollTop=1e9;\n  try{\n    const p=isMan\n
+    \     ?`Explain the Linux command '${cmd}'. Cover: what it does, the most useful
+    flags/options, 3 practical real-world examples, and one common gotcha or mistake.
+    Keep under 200 words. Plain text only, no markdown.`\n      :`Explain this Linux
+    concept or command: \"${cmd}\". What does it do, when would you use it, and give
+    2 concrete examples. Under 150 words. Plain text only.`;\n    const r=await fetch('/webhook/learning-explain',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd,prompt:p})});\n
+    \   const d=await r.json();\n    el.innerHTML=`<span class=\"ti\">\U0001F4D6 ${esc(cmd)}</span>\\n<span
+    style=\"color:var(--text)\">${esc(d.explanation||d.response||JSON.stringify(d))}</span>`;\n
+    \ }catch(e){el.innerHTML=`<span class=\"te\">Could not reach Ollama. Check n8n
+    learning-explain workflow is active.</span>`;}\n  document.getElementById('tout').scrollTop=1e9;\n}\n\nfunction
+    clrTerm(){document.getElementById('tout').innerHTML='';}\n\n// ── Challenges ─────────────────────────────────────────────\nfunction
+    nextChal(){chalIdx=(chalIdx+1)%chals.length;loadChal();}\nfunction loadChal(){\n
+    \ const c=chals[chalIdx];\n  document.getElementById('chalText').textContent=c.t;\n
+    \ document.getElementById('chalHint').textContent='Hint: '+c.h;\n  document.getElementById('chalNum').textContent=chalIdx+1;\n}\n\n//
+    ── Quiz ───────────────────────────────────────────────────\nasync function genQ(){\n
+    \ const m=document.getElementById('mod').value,d=document.getElementById('diff').value;\n
+    \ document.getElementById('genBtn').disabled=true;\n  ['qCard','ansWrap','resWrap'].forEach(id=>{document.getElementById(id).style.display=id==='qCard'?'block':'none';});\n
+    \ hintOn=false;document.getElementById('hint').style.display='none';\n  document.getElementById('qMeta').innerHTML='<span
+    class=\"spin\"></span>';\n  document.getElementById('qText').innerHTML='<span
+    style=\"color:var(--muted)\">Generating question with Ollama...</span>';\n  document.getElementById('qCtx').textContent='';\n
+    \ try{\n    const r=await fetch('/webhook/learning-quiz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({module:m,difficulty:d})});\n
+    \   const data=await r.json();curQ=data;\n    const label=document.getElementById('mod').options[document.getElementById('mod').selectedIndex].text;\n
+    \   document.getElementById('qMeta').innerHTML=`<span class=\"tag tag-mod\">${esc(label)}</span><span
+    class=\"tag tag-${d==='beginner'?'easy':d==='advanced'?'hard':'med'}\">${d}</span>`;\n
+    \   document.getElementById('qText').textContent=data.question||'Question unavailable';\n
+    \   document.getElementById('qCtx').textContent=data.context||'';\n    document.getElementById('hint').textContent='\U0001F4A1
+    '+(data.hint||'Think about the underlying system concepts...');\n    document.getElementById('ans').value='';\n
+    \   document.getElementById('ansWrap').style.display='block';\n  }catch(e){document.getElementById('qText').innerHTML=`<span
+    class=\"te\">Cannot reach n8n. Ensure the learning-quiz workflow is active at
+    n8n.home.</span>`;}\n  document.getElementById('genBtn').disabled=false;\n}\n\nasync
+    function grade(){\n  const answer=document.getElementById('ans').value.trim();\n
+    \ if(!answer)return;\n  document.getElementById('subBtn').disabled=true;\n  document.getElementById('resWrap').style.display='block';\n
+    \ document.getElementById('res').className='res';\n  document.getElementById('resScore').innerHTML='<span
+    class=\"spin\"></span>';\n  document.getElementById('resExp').textContent='Grading
+    with Ollama...';\n  try{\n    const r=await fetch('/webhook/learning-grade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:curQ.question,answer,module:document.getElementById('mod').value})});\n
+    \   const d=await r.json();const s=parseInt(d.score)||0;\n    document.getElementById('res').className=`res
+    ${s>=8?'ok':s>=5?'mid':'bad'}`;\n    document.getElementById('resScore').textContent=`${s}/10
+    ${s>=8?'\U0001F31F':s>=5?'\U0001F44D':'\U0001F4DA'}`;\n    document.getElementById('resExp').innerHTML=(d.explanation||'').replace(/`([^`]+)`/g,'<code>$1</code>');\n
+    \   score+=s;qct++;\n    document.getElementById('pts').textContent=score;\n    document.getElementById('qct').textContent=qct;\n
+    \   document.getElementById('pf').style.width=Math.min(qct*5,100)+'%';\n  }catch(e){document.getElementById('resExp').textContent='Could
+    not grade. Check n8n learning-grade workflow.';}\n  document.getElementById('subBtn').disabled=false;\n}\n\nfunction
+    toggleHint(){hintOn=!hintOn;document.getElementById('hint').style.display=hintOn?'block':'none';}\n\n//
+    ── Topics tab ─────────────────────────────────────────────\nfunction renderTopics(){\n
+    \ document.getElementById('topGrid').innerHTML=topics.map(t=>`\n    <div class=\"tc\"
+    onclick=\"document.getElementById('mod').value='${t.mod}';sw('quiz')\">\n      <h4>${t.icon}
+    ${t.name}</h4>\n      <ul>${t.items.map(i=>`<li>${i}</li>`).join('')}</ul>\n      <p
+    class=\"go\">Click to quiz on this topic →</p>\n    </div>`).join('');\n}\n\n//
+    ── Tab switcher ───────────────────────────────────────────\nfunction sw(name){\n
+    \ document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['quiz','term','topics'][i]===name));\n
+    \ document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));\n
+    \ document.getElementById('pane-'+name).classList.add('active');\n  if(name==='term')document.getElementById('tin').focus();\n}\n\n//
+    ── Init ───────────────────────────────────────────────────\ninitTerm();renderTopics();loadChal();\n</script>\n</body>\n</html>\n"
+kind: ConfigMap
+metadata:
+  name: learning-index

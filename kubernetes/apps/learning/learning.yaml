@@ -1,0 +1,130 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: learning
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: learning-files
+  namespace: learning
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: learning
+data:
+  default.conf: |
+    server {
+      listen 80;
+      root /files;
+
+      location /webhook/ {
+        proxy_pass http://n8n.n8n.svc.cluster.local:5678/webhook/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 120s;
+      }
+
+      location / {
+        types { text/html html htm; }
+        default_type text/html;
+        add_header Cache-Control "no-cache";
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learning
+  namespace: learning
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: learning
+  template:
+    metadata:
+      labels:
+        app: learning
+    spec:
+      initContainers:
+        - name: copy-index
+          image: busybox
+          command: ["sh", "-c", "cp /index-src/index.html /files/index.html && chmod 644 /files/index.html"]
+          volumeMounts:
+            - name: files
+              mountPath: /files
+            - name: index-html
+              mountPath: /index-src
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: files
+              mountPath: /files
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          resources:
+            requests:
+              cpu: "30m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+      volumes:
+        - name: files
+          persistentVolumeClaim:
+            claimName: learning-files
+        - name: config
+          configMap:
+            name: nginx-config
+        - name: index-html
+          configMap:
+            name: learning-index
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learning
+  namespace: learning
+spec:
+  selector:
+    app: learning
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: learning
+  namespace: learning
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: learning.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: learning
+                port:
+                  number: 80
