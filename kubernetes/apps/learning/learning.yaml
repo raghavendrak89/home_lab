@@ -118,7 +118,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: learning.home
+    - host: linux.learning.home
       http:
         paths:
           - path: /
