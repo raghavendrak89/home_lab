@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Vector Studio: Tokens & Embeddings</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0c15;
+            --card-bg: rgba(19, 21, 38, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-primary: #6366f1; /* Indigo */
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-success: #10b981;
+            --accent-pink: #ec4899;
+            --font-main: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.03) 0%, transparent 40%);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding-bottom: 2rem;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-pink));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffffff, #d1d5db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Container */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.35rem;
+            margin-bottom: 2rem;
+            gap: 0.25rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tab-btn.active {
+            color: var(--text-main);
+            background: var(--accent-primary);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Card Layout */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Inputs & Buttons */
+        textarea, input[type="text"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: var(--font-main);
+            padding: 0.9rem;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), #4f46e5);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.9rem 1.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Flex & Grid Systems */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tab 1: Tokenizer Styles */
+        .tokenized-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            line-height: 2;
+            font-size: 1.1rem;
+            min-height: 120px;
+            margin-top: 1.5rem;
+        }
+
+        .token-chunk {
+            display: inline-block;
+            padding: 0.1rem 0.3rem;
+            margin: 0.15rem 0.05rem;
+            border-radius: 4px;
+            cursor: help;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .token-chunk:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .stat-lbl {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .token-table-wrap {
+            margin-top: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-muted);
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Tab 2: Map Styles */
+        .text-list-box {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* Tab 3: Similarity Styles */
+        .sim-gauge-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .gauge-wrap {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 10px;
+        }
+
+        .circle-fill {
+            fill: none;
+            stroke: var(--accent-primary);
+            stroke-width: 10px;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dasharray 0.6s ease;
+        }
+
+        .gauge-val {
+            position: absolute;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        .sim-interpretation {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-success);
+        }
+
+        /* Tab 4: Vector Math Styles */
+        .math-expr {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .math-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .math-symbol {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            width: 30px;
+            text-align: center;
+        }
+
+        .math-input-wrap {
+            flex: 1;
+        }
+
+        .math-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Helper Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">V</div>
+            <h1>AI Vector Studio</h1>
+        </div>
+        <p class="subtitle">An educational playground to understand text tokenization and high-dimensional vector embeddings</p>
+    </header>
+
+    <div class="app-container">
+        <!-- Tab Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tokenizer')">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                Tokenizer
+            </button>
+            <button class="tab-btn" onclick="switchTab('map')">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                Semantic Map (PCA)
+            </button>
+            <button class="tab-btn" onclick="switchTab('similarity')">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
+                Cosine Similarity
+            </button>
+            <button class="tab-btn" onclick="switchTab('math')">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4"/></svg>
+                Vector Math
+            </button>
+        </nav>
+
+        <!-- ================== TAB 1: TOKENIZER ================== -->
+        <section id="tab-tokenizer" class="card tab-content">
+            <div class="card-header">
+                <h2 class="card-title">Byte-Pair Encoding Tokenizer</h2>
+                <p class="card-desc">Visualizes how LLMs slice text strings into numeric tokens. Based on the <code>cl100k_base</code> vocabulary used by Qwen 2.5 and GPT-4.</p>
+            </div>
+            <div>
+                <textarea id="tok-input" rows="4" placeholder="Enter text to tokenize...">Tokenization splits text into chunks! Token 123 is fun. Try emoji: 🚀 and spaces     .</textarea>
+                <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+                    <button class="btn-primary" onclick="runTokenizer()" id="tok-btn">Tokenize</button>
+                </div>
+            </div>
+            
+            <div id="tok-results" class="hidden">
+                <h3 style="margin-top: 1.5rem; font-size: 1.1rem; font-weight: 500;">Colored Tokens (Hover to view IDs)</h3>
+                <div id="token-visualization" class="tokenized-box"></div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val" id="stat-chars">-</div>
+                        <div class="stat-lbl">Characters</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="stat-tokens">-</div>
+                        <div class="stat-lbl">Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="stat-ratio">-</div>
+                        <div class="stat-lbl">Chars / Token</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; font-size: 1.1rem; font-weight: 500;">Token Details Table</h3>
+                <div class="token-table-wrap">
+                    <table id="token-table">
+                        <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th>Token ID</th>
+                                <th>Represented Text</th>
+                                <th>Space Detected?</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== TAB 2: SEMANTIC MAP ================== -->
+        <section id="tab-map" class="card tab-content hidden">
+            <div class="card-header">
+                <h2 class="card-title">Semantic Embeddings Map</h2>
+                <p class="card-desc">Converts sentences into 768-dimensional vectors using <code>nomic-embed-text</code>, then uses Principal Component Analysis (PCA) to project them into a 2D graph. Observe how related concepts physically cluster together.</p>
+            </div>
+            <div class="grid-2">
+                <div class="text-list-box">
+                    <h3 style="font-size: 1.1rem; font-weight: 500;">Sentences to Project</h3>
+                    <textarea id="map-input" rows="12" style="font-family: var(--font-main); font-size: 0.9rem; line-height: 1.6;" placeholder="Enter one sentence per line...">The cat sat on the mat.
+A feline slept on the carpet.
+A puppy barked in the garden.
+The dog is playing outside.
+Astronauts landed on the moon.
+A rocket launched into outer space.
+The stock market crashed today.
+Finance and investment strategies.</textarea>
+                    <div>
+                        <button class="btn-primary" onclick="runProjection()" id="map-btn">Visualize Vectors</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 500; margin-bottom: 1rem;">2D Projection Map</h3>
+                    <div class="chart-container">
+                        <canvas id="pcaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== TAB 3: COSINE SIMILARITY ================== -->
+        <section id="tab-similarity" class="card tab-content hidden">
+            <div class="card-header">
+                <h2 class="card-title">Cosine Similarity Calculator</h2>
+                <p class="card-desc">Measures the cosine of the angle between two high-dimensional embedding vectors. 1.0 means identical semantics, 0.0 means unrelated, and -1.0 means opposite meanings.</p>
+            </div>
+            <div class="grid-2">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label style="display:block; margin-bottom:0.5rem; font-size:0.85rem; color:var(--text-muted);">SENTENCE 1</label>
+                        <input type="text" id="sim-text1" value="A cat chasing a mouse.">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:0.5rem; font-size:0.85rem; color:var(--text-muted);">SENTENCE 2</label>
+                        <input type="text" id="sim-text2" value="A feline running after a rodent.">
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn-primary" onclick="runSimilarity()" id="sim-btn">Compare Semantics</button>
+                    </div>
+                </div>
+                <div class="sim-gauge-area">
+                    <div class="gauge-wrap">
+                        <svg width="100%" height="100%" viewBox="0 0 100 100">
+                            <circle class="circle-bg" cx="50" cy="50" r="40\"></circle>
+                            <circle class="circle-fill" id="gauge-circle" cx="50" cy="50" r="40" stroke-dasharray="0 251.2"></circle>
+                        </svg>
+                        <div class="gauge-val" id="similarity-score">-</div>
+                    </div>
+                    <div class="sim-interpretation" id="similarity-label">-</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== TAB 4: VECTOR MATH ================== -->
+        <section id="tab-math" class="card tab-content hidden">
+            <div class="card-header">
+                <h2 class="card-title">Vector Mathematics</h2>
+                <p class="card-desc">LLM embeddings can do algebra! Calculate the vector <code>A - B + C</code>, then rank target words by how close they are to the result using cosine similarity.</p>
+            </div>
+            <div class="grid-2">
+                <div class="math-expr">
+                    <div class="math-row">
+                        <div class="math-input-wrap">
+                            <div class="math-label">Vector A (Base Concept)</div>
+                            <input type="text" id="math-a" value="king">
+                        </div>
+                    </div>
+                    <div class="math-row">
+                        <div class="math-symbol">−</div>
+                        <div class="math-input-wrap">
+                            <div class="math-label">Vector B (Subtracted Attribute)</div>
+                            <input type="text" id="math-b" value="man">
+                        </div>
+                    </div>
+                    <div class="math-row">
+                        <div class="math-symbol">+</div>
+                        <div class="math-input-wrap">
+                            <div class="math-label">Vector C (Added Attribute)</div>
+                            <input type="text" id="math-c" value="woman">
+                        </div>
+                    </div>
+                    <div class="math-row">
+                        <div class="math-symbol">=</div>
+                        <div class="math-input-wrap">
+                            <div class="math-label">Target Words to Compare Against</div>
+                            <input type="text" id="math-targets" value="queen, prince, princess, apple, banana, ruler, throne, doctor">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn-primary" onclick="runVectorMath()" id="math-btn">Calculate Algebra</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 500; margin-bottom: 1.5rem;">Similarity to (A - B + C)</h3>
+                    <div style="height: 350px;">
+                        <canvas id="mathChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Tab switching logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(card => card.classList.add('hidden'));
+            
+            // Activate button
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            // Show card
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        }
+
+        // Color palette for token blocks
+        const colors = [
+            'rgba(99, 102, 241, 0.25)',  // Indigo
+            'rgba(236, 72, 153, 0.25)',  // Pink
+            'rgba(16, 185, 129, 0.25)',  // Emerald
+            'rgba(245, 158, 11, 0.25)',  // Amber
+            'rgba(59, 130, 246, 0.25)',  // Blue
+            'rgba(139, 92, 246, 0.25)',  // Purple
+            'rgba(239, 68, 68, 0.25)',   // Red
+            'rgba(20, 184, 166, 0.25)'   // Teal
+        ];
+
+        // Global references to charts to destroy them before re-creating
+        let pcaChartInstance = null;
+        let mathChartInstance = null;
+
+        // API Tokenizer implementation
+        async function runTokenizer() {
+            const input = document.getElementById('tok-input').value;
+            const btn = document.getElementById('tok-btn');
+            const results = document.getElementById('tok-results');
+            
+            btn.innerHTML = '<span class="loader"></span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/tokenize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: input })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                // Render stats
+                document.getElementById('stat-chars').innerText = data.stats.num_characters;
+                document.getElementById('stat-tokens').innerText = data.stats.num_tokens;
+                document.getElementById('stat-ratio').innerText = data.stats.ratio;
+
+                // Render colored tokens
+                const container = document.getElementById('token-visualization');
+                container.innerHTML = '';
+                
+                const tbody = document.querySelector('#token-table tbody');
+                tbody.innerHTML = '';
+
+                data.tokens.forEach((t, index) => {
+                    const color = colors[index % colors.length];
+                    
+                    // Highlight box
+                    const chunk = document.createElement('span');
+                    chunk.className = 'token-chunk';
+                    chunk.style.backgroundColor = color;
+                    chunk.innerText = t.text;
+                    chunk.title = `Token ID: ${t.id} (Index: ${index})`;
+                    container.appendChild(chunk);
+
+                    // Table Row
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index}</td>
+                        <td><code style="font-family: var(--font-mono);">${t.id}</code></td>
+                        <td><code style="font-family: var(--font-mono); background: rgba(255,255,255,0.05); padding: 0.1rem 0.3rem; border-radius: 4px; color: ${color.replace('0.25', '1')};">${JSON.stringify(t.text)}</code></td>
+                        <td>${t.text.includes(' ') ? '<span style="color:var(--accent-success)">Yes</span>' : '<span style="color:var(--text-muted)">No</span>'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                results.classList.remove('hidden');
+
+            } catch (err) {
+                alert(`API Error: ${err}`);
+            } finally {
+                btn.innerText = 'Tokenize';
+                btn.disabled = false;
+            }
+        }
+
+        // API PCA Projection implementation
+        async function runProjection() {
+            const input = document.getElementById('map-input').value;
+            const btn = document.getElementById('map-btn');
+            
+            const sentences = input.split('\n').filter(s => s.trim() !== '');
+            if (sentences.length < 2) {
+                alert('Please enter at least 2 sentences');
+                return;
+            }
+
+            btn.innerHTML = '<span class="loader"></span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/project', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ texts: sentences })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                // Render Chart.js scatter plot
+                const ctx = document.getElementById('pcaChart').getContext('2d');
+                
+                if (pcaChartInstance) {
+                    pcaChartInstance.destroy();
+                }
+
+                const datasets = data.map((d, index) => ({
+                    label: d.text.length > 30 ? d.text.slice(0, 27) + '...' : d.text,
+                    data: [{ x: d.x, y: d.y }],
+                    backgroundColor: colors[index % colors.length].replace('0.25', '0.8'),
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    borderColor: 'white',
+                    borderWidth: 1.5,
+                    fullText: d.text // Custom property for tooltips
+                }));
+
+                pcaChartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false // Hide long legends
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.fullText + ` (${context.raw.x}, ${context.raw.y})`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                alert(`API Error: ${err}`);
+            } finally {
+                btn.innerText = 'Visualize Vectors';
+                btn.disabled = false;
+            }
+        }
+
+        // API Cosine Similarity implementation
+        async function runSimilarity() {
+            const t1 = document.getElementById('sim-text1').value;
+            const t2 = document.getElementById('sim-text2').value;
+            const btn = document.getElementById('sim-btn');
+            
+            if (!t1 || !t2) {
+                alert('Please enter both sentences');
+                return;
+            }
+
+            btn.innerHTML = '<span class="loader"></span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/similarity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text1: t1, text2: t2 })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                const sim = data.similarity;
+                const percentage = Math.max(0, Math.round(sim * 100));
+                
+                // Animate gauge
+                const circle = document.getElementById('gauge-circle');
+                const circumference = 2 * Math.PI * 40; // ~251.2
+                const offset = circumference - (percentage / 100) * circumference;
+                circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                circle.style.strokeDashoffset = offset;
+
+                document.getElementById('similarity-score').innerText = sim.toFixed(4);
+                
+                // Color gauge dynamically
+                if (sim > 0.8) {
+                    circle.style.stroke = '#10b981'; // Green
+                    document.getElementById('similarity-label').innerText = 'Highly Similar / Paraphrase';
+                    document.getElementById('similarity-label').style.color = '#10b981';
+                } else if (sim > 0.4) {
+                    circle.style.stroke = '#3b82f6'; // Blue
+                    document.getElementById('similarity-label').innerText = 'Moderately Similar / Same Topic';
+                    document.getElementById('similarity-label').style.color = '#3b82f6';
+                } else if (sim > 0.1) {
+                    circle.style.stroke = '#f59e0b'; // Amber
+                    document.getElementById('similarity-label').innerText = 'Weakly Related / Different Context';
+                    document.getElementById('similarity-label').style.color = '#f59e0b';
+                } else {
+                    circle.style.stroke = '#ef4444'; // Red
+                    document.getElementById('similarity-label').innerText = 'Unrelated / Opposite';
+                    document.getElementById('similarity-label').style.color = '#ef4444';
+                }
+
+            } catch (err) {
+                alert(`API Error: ${err}`);
+            } finally {
+                btn.innerText = 'Compare Semantics';
+                btn.disabled = false;
+            }
+        }
+
+        // API Vector Math implementation
+        async function runVectorMath() {
+            const a = document.getElementById('math-a').value;
+            const b = document.getElementById('math-b').value;
+            const c = document.getElementById('math-c').value;
+            const targetsStr = document.getElementById('math-targets').value;
+            const btn = document.getElementById('math-btn');
+
+            const targets = targetsStr.split(',').map(t => t.trim()).filter(t => t !== '');
+            if (targets.length === 0) {
+                alert('Please enter at least 1 target word');
+                return;
+            }
+
+            btn.innerHTML = '<span class="loader"></span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/math', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ a, b, c, targets })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    return;
+                }
+
+                // Render Bar Chart
+                const ctx = document.getElementById('mathChart').getContext('2d');
+                
+                if (mathChartInstance) {
+                    mathChartInstance.destroy();
+                }
+
+                const labels = data.map(d => d.text);
+                const scores = data.map(d => d.similarity);
+                
+                // Color the highest similarity green
+                const barColors = scores.map((s, index) => 
+                    index === 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(99, 102, 241, 0.4)'
+                );
+                
+                const hoverColors = scores.map((s, index) => 
+                    index === 0 ? 'rgba(16, 185, 129, 0.9)' : 'rgba(99, 102, 241, 0.6)'
+                );
+
+                mathChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: scores,
+                            backgroundColor: barColors,
+                            hoverBackgroundColor: hoverColors,
+                            borderColor: 'rgba(255,255,255,0.08)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y: {
+                                min: 0,
+                                max: 1,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+
+            } catch (err) {
+                alert(`API Error: ${err}`);
+            } finally {
+                btn.innerText = 'Calculate Algebra';
+                btn.disabled = false;
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            // Trigger tokenizer once to display default examples
+            runTokenizer();
+        };
+    </script>
+</body>
+</html>

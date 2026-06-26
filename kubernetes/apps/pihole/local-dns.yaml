@@ -33,3 +33,4 @@ data:
     address=/token-app.home/192.168.0.201
     address=/shona.home/192.168.0.201
     address=/learning.home/192.168.0.201
+    address=/infra.home/192.168.0.201

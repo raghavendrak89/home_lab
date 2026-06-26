@@ -1,5 +1,7 @@
 grafana:
   adminPassword: "changeme"
+  plugins:
+    - grafana-llm-app
   resources:
     requests:
       cpu: "200m"
