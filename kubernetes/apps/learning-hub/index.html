@@ -201,6 +201,7 @@
     .card-k8s::before  { background: linear-gradient(135deg, rgba(88,166,255,.12), rgba(57,212,200,.12)) border-box; border: 1px solid rgba(57,212,200,.5); }
     .card-istio::before { background: linear-gradient(135deg, rgba(188,140,255,.12), rgba(248,81,73,.08)) border-box; border: 1px solid rgba(188,140,255,.5); }
     .card-future::before { background: linear-gradient(135deg, rgba(210,153,34,.08), rgba(219,109,40,.06)) border-box; border: 1px solid rgba(210,153,34,.3); }
+    .card-sysdesign::before { background: linear-gradient(135deg, rgba(249,115,22,.12), rgba(234,179,8,.08)) border-box; border: 1px solid rgba(249,115,22,.5); }
 
     .card-icon {
       width: 44px;
@@ -216,6 +217,7 @@
     .icon-k8s   { background: rgba(57,212,200,.15); }
     .icon-istio { background: rgba(188,140,255,.15); }
     .icon-future{ background: rgba(210,153,34,.1); }
+    .icon-sysdesign { background: rgba(249,115,22,.15); }
 
     .card-header {
       display: flex;
@@ -358,6 +360,7 @@
     <a class="nav-link" href="https://linux.learning.home" target="_blank">Linux</a>
     <a class="nav-link" href="https://k8s.learning.home" target="_blank">Kubernetes</a>
     <a class="nav-link" href="https://istio.learning.home" target="_blank">Istio</a>
+    <a class="nav-link" href="https://sysdesign.home" target="_blank">SysDesign</a>
   </nav>
 </header>
 
@@ -367,7 +370,7 @@
   <p>Everything you're learning, powered by your own homelab — Ollama, Kubernetes, and your own stack.</p>
   <div class="hero-stats">
     <div class="stat">
-      <span class="stat-num" id="active-count">4</span>
+      <span class="stat-num" id="active-count">5</span>
       <span class="stat-label">Active courses</span>
     </div>
     <div class="stat">
@@ -473,6 +476,29 @@
       </div>
       <div class="card-footer">
         <span>Istio Learning Hub</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- System Design -->
+    <a class="card card-sysdesign active" href="https://sysdesign.home" target="_blank">
+      <div class="card-header">
+        <div class="card-icon icon-sysdesign">🏗️</div>
+        <span class="badge badge-new">✦ New</span>
+      </div>
+      <div>
+        <div class="card-title">System Design</div>
+        <div class="card-sub">sysdesign.home</div>
+      </div>
+      <p class="card-desc">Learn how to design large-scale distributed systems — Netflix, Uber, WhatsApp and more. Practice with a structured 6-step interview walkthrough and AI feedback.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Distributed Systems</span>
+        <span class="topic-tag">Scalability</span>
+        <span class="topic-tag">Trade-offs</span>
+        <span class="topic-tag">Interview Prep</span>
+      </div>
+      <div class="card-footer">
+        <span>17 systems • AI tutor • Practice mode</span>
         <span class="card-arrow">→</span>
       </div>
     </a>
