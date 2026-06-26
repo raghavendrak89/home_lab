@@ -1,0 +1,213 @@
+apiVersion: v1
+data:
+  index.html: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n
+    \ <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n
+    \ <title>Learning Hub</title>\n  <style>\n    * { box-sizing: border-box; margin:
+    0; padding: 0; }\n    :root {\n      --bg: #0d1117;\n      --surface: #161b22;\n
+    \     --surface2: #1c2128;\n      --border: #30363d;\n      --text: #e6edf3;\n
+    \     --muted: #8b949e;\n      --green: #3fb950;\n      --blue: #58a6ff;\n      --purple:
+    #bc8cff;\n      --yellow: #d29922;\n      --orange: #db6d28;\n      --red: #f85149;\n
+    \     --teal: #39d4c8;\n    }\n    body {\n      background: var(--bg);\n      color:
+    var(--text);\n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Inter', sans-serif;\n      min-height: 100vh;\n      display: flex;\n      flex-direction:
+    column;\n    }\n\n    /* ── Header ── */\n    header {\n      background: var(--surface);\n
+    \     border-bottom: 1px solid var(--border);\n      padding: 0 32px;\n      display:
+    flex;\n      align-items: center;\n      justify-content: space-between;\n      height:
+    60px;\n      position: sticky;\n      top: 0;\n      z-index: 10;\n    }\n    .logo
+    {\n      display: flex;\n      align-items: center;\n      gap: 10px;\n      font-size:
+    1.1em;\n      font-weight: 700;\n      color: var(--text);\n      text-decoration:
+    none;\n    }\n    .logo-dot {\n      width: 28px;\n      height: 28px;\n      background:
+    linear-gradient(135deg, #58a6ff, #bc8cff);\n      border-radius: 8px;\n      display:
+    flex;\n      align-items: center;\n      justify-content: center;\n      font-size:
+    15px;\n    }\n    .nav-links {\n      display: flex;\n      gap: 4px;\n    }\n
+    \   .nav-link {\n      padding: 6px 12px;\n      border-radius: 6px;\n      font-size:
+    .85em;\n      color: var(--muted);\n      text-decoration: none;\n      transition:
+    all .15s;\n    }\n    .nav-link:hover { background: var(--border); color: var(--text);
+    }\n\n    /* ── Hero ── */\n    .hero {\n      padding: 56px 32px 40px;\n      max-width:
+    1100px;\n      margin: 0 auto;\n      width: 100%;\n    }\n    .hero-badge {\n
+    \     display: inline-flex;\n      align-items: center;\n      gap: 6px;\n      background:
+    rgba(88, 166, 255, .1);\n      border: 1px solid rgba(88, 166, 255, .25);\n      color:
+    var(--blue);\n      padding: 4px 12px;\n      border-radius: 20px;\n      font-size:
+    .78em;\n      font-weight: 600;\n      margin-bottom: 16px;\n    }\n    .hero
+    h1 {\n      font-size: 2.4em;\n      font-weight: 800;\n      line-height: 1.2;\n
+    \     margin-bottom: 14px;\n      background: linear-gradient(135deg, #e6edf3
+    0%, #8b949e 100%);\n      -webkit-background-clip: text;\n      -webkit-text-fill-color:
+    transparent;\n      background-clip: text;\n    }\n    .hero p {\n      font-size:
+    1.05em;\n      color: var(--muted);\n      max-width: 560px;\n      line-height:
+    1.65;\n    }\n    .hero-stats {\n      display: flex;\n      gap: 28px;\n      margin-top:
+    28px;\n      flex-wrap: wrap;\n    }\n    .stat {\n      display: flex;\n      flex-direction:
+    column;\n    }\n    .stat-num {\n      font-size: 1.6em;\n      font-weight: 700;\n
+    \     color: var(--text);\n    }\n    .stat-label {\n      font-size: .78em;\n
+    \     color: var(--muted);\n      margin-top: 2px;\n    }\n\n    /* ── Main content
+    ── */\n    main {\n      flex: 1;\n      max-width: 1100px;\n      margin: 0 auto;\n
+    \     width: 100%;\n      padding: 0 32px 64px;\n    }\n    .section-label {\n
+    \     font-size: .78em;\n      font-weight: 700;\n      text-transform: uppercase;\n
+    \     letter-spacing: .08em;\n      color: var(--muted);\n      margin-bottom:
+    16px;\n      display: flex;\n      align-items: center;\n      gap: 8px;\n    }\n
+    \   .section-label::after {\n      content: '';\n      flex: 1;\n      height:
+    1px;\n      background: var(--border);\n    }\n\n    /* ── Cards ── */\n    .cards
+    {\n      display: grid;\n      grid-template-columns: repeat(auto-fill, minmax(280px,
+    1fr));\n      gap: 16px;\n      margin-bottom: 40px;\n    }\n    .card {\n      background:
+    var(--surface);\n      border: 1px solid var(--border);\n      border-radius:
+    12px;\n      padding: 22px;\n      text-decoration: none;\n      color: inherit;\n
+    \     display: flex;\n      flex-direction: column;\n      gap: 12px;\n      transition:
+    all .2s;\n      position: relative;\n      overflow: hidden;\n    }\n    .card::before
+    {\n      content: '';\n      position: absolute;\n      inset: 0;\n      border-radius:
+    12px;\n      opacity: 0;\n      transition: opacity .2s;\n    }\n    .card:hover
+    {\n      border-color: transparent;\n      transform: translateY(-2px);\n      box-shadow:
+    0 8px 30px rgba(0,0,0,.4);\n    }\n    .card:hover::before { opacity: 1; }\n    .card.active:hover
+    { border-color: transparent; }\n\n    .card-ai::before   { background: linear-gradient(135deg,
+    rgba(88,166,255,.12), rgba(188,140,255,.08)) border-box; border: 1px solid rgba(88,166,255,.5);
+    }\n    .card-linux::before { background: linear-gradient(135deg, rgba(63,185,80,.12),
+    rgba(57,212,200,.08)) border-box; border: 1px solid rgba(63,185,80,.5); }\n    .card-k8s::before
+    \ { background: linear-gradient(135deg, rgba(88,166,255,.12), rgba(57,212,200,.12))
+    border-box; border: 1px solid rgba(57,212,200,.5); }\n    .card-istio::before
+    { background: linear-gradient(135deg, rgba(188,140,255,.12), rgba(248,81,73,.08))
+    border-box; border: 1px solid rgba(188,140,255,.5); }\n    .card-future::before
+    { background: linear-gradient(135deg, rgba(210,153,34,.08), rgba(219,109,40,.06))
+    border-box; border: 1px solid rgba(210,153,34,.3); }\n\n    .card-icon {\n      width:
+    44px;\n      height: 44px;\n      border-radius: 10px;\n      display: flex;\n
+    \     align-items: center;\n      justify-content: center;\n      font-size: 22px;\n
+    \   }\n    .icon-ai    { background: rgba(88,166,255,.15); }\n    .icon-linux
+    { background: rgba(63,185,80,.15); }\n    .icon-k8s   { background: rgba(57,212,200,.15);
+    }\n    .icon-istio { background: rgba(188,140,255,.15); }\n    .icon-future{ background:
+    rgba(210,153,34,.1); }\n\n    .card-header {\n      display: flex;\n      align-items:
+    flex-start;\n      justify-content: space-between;\n      gap: 10px;\n    }\n
+    \   .card-title {\n      font-size: 1.05em;\n      font-weight: 700;\n      color:
+    var(--text);\n      margin-bottom: 3px;\n    }\n    .card-sub {\n      font-size:
+    .78em;\n      color: var(--muted);\n      font-family: 'Courier New', monospace;\n
+    \   }\n    .badge {\n      padding: 2px 9px;\n      border-radius: 10px;\n      font-size:
+    .7em;\n      font-weight: 700;\n      white-space: nowrap;\n      flex-shrink:
+    0;\n    }\n    .badge-live   { background: rgba(63,185,80,.15);  color: var(--green);
+    }\n    .badge-new    { background: rgba(88,166,255,.15);  color: var(--blue);
+    }\n    .badge-soon   { background: rgba(139,148,158,.1);  color: var(--muted);
+    }\n\n    .card-desc {\n      font-size: .88em;\n      color: var(--muted);\n      line-height:
+    1.6;\n      flex: 1;\n    }\n    .card-topics {\n      display: flex;\n      flex-wrap:
+    wrap;\n      gap: 6px;\n    }\n    .topic-tag {\n      background: var(--surface2);\n
+    \     border: 1px solid var(--border);\n      color: var(--muted);\n      padding:
+    2px 8px;\n      border-radius: 6px;\n      font-size: .72em;\n    }\n    .card-footer
+    {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n
+    \     padding-top: 10px;\n      border-top: 1px solid var(--border);\n      font-size:
+    .8em;\n      color: var(--muted);\n    }\n    .card-arrow {\n      color: var(--muted);\n
+    \     transition: transform .2s, color .2s;\n    }\n    .card:hover .card-arrow
+    {\n      transform: translateX(4px);\n      color: var(--blue);\n    }\n\n    .card.coming-soon
+    {\n      opacity: .6;\n      cursor: default;\n      pointer-events: none;\n    }\n\n
+    \   /* ── Stack section ── */\n    .stack {\n      background: var(--surface);\n
+    \     border: 1px solid var(--border);\n      border-radius: 12px;\n      padding:
+    20px 24px;\n      display: flex;\n      flex-wrap: wrap;\n      align-items: center;\n
+    \     gap: 12px;\n    }\n    .stack-label {\n      font-size: .8em;\n      color:
+    var(--muted);\n      margin-right: 4px;\n      white-space: nowrap;\n    }\n    .stack-item
+    {\n      display: flex;\n      align-items: center;\n      gap: 6px;\n      background:
+    var(--surface2);\n      border: 1px solid var(--border);\n      padding: 5px 12px;\n
+    \     border-radius: 8px;\n      font-size: .82em;\n      color: var(--text);\n
+    \   }\n    .stack-dot {\n      width: 7px;\n      height: 7px;\n      border-radius:
+    50%;\n    }\n    .dot-green  { background: var(--green); }\n    .dot-blue   {
+    background: var(--blue); }\n    .dot-purple { background: var(--purple); }\n    .dot-teal
+    \  { background: var(--teal); }\n    .dot-orange { background: var(--orange);
+    }\n    .dot-yellow { background: var(--yellow); }\n\n    /* ── Footer ── */\n
+    \   footer {\n      text-align: center;\n      padding: 20px;\n      font-size:
+    .78em;\n      color: var(--muted);\n      border-top: 1px solid var(--border);\n
+    \   }\n\n    @media (max-width: 640px) {\n      .hero h1 { font-size: 1.7em; }\n
+    \     header { padding: 0 16px; }\n      .hero, main { padding-left: 16px; padding-right:
+    16px; }\n      .nav-links { display: none; }\n    }\n  </style>\n</head>\n<body>\n\n<header>\n
+    \ <a class=\"logo\" href=\"/\">\n    <div class=\"logo-dot\">\U0001F393</div>\n
+    \   Learning Hub\n  </a>\n  <nav class=\"nav-links\">\n    <a class=\"nav-link\"
+    href=\"https://ai.learning.home\" target=\"_blank\">AI</a>\n    <a class=\"nav-link\"
+    href=\"https://linux.learning.home\" target=\"_blank\">Linux</a>\n    <a class=\"nav-link\"
+    href=\"https://k8s.learning.home\" target=\"_blank\">Kubernetes</a>\n    <a class=\"nav-link\"
+    href=\"https://istio.learning.home\" target=\"_blank\">Istio</a>\n  </nav>\n</header>\n\n<div
+    class=\"hero\">\n  <div class=\"hero-badge\">\U0001F3E0 Homelab Learning Portal</div>\n
+    \ <h1>Your personal<br>learning space</h1>\n  <p>Everything you're learning, powered
+    by your own homelab — Ollama, Kubernetes, and your own stack.</p>\n  <div class=\"hero-stats\">\n
+    \   <div class=\"stat\">\n      <span class=\"stat-num\" id=\"active-count\">4</span>\n
+    \     <span class=\"stat-label\">Active courses</span>\n    </div>\n    <div class=\"stat\">\n
+    \     <span class=\"stat-num\">3</span>\n      <span class=\"stat-label\">Nodes
+    running</span>\n    </div>\n    <div class=\"stat\">\n      <span class=\"stat-num\">\U0001F7E2</span>\n
+    \     <span class=\"stat-label\">All systems up</span>\n    </div>\n  </div>\n</div>\n\n<main>\n
+    \ <div class=\"section-label\">Active Learning</div>\n  <div class=\"cards\">\n\n
+    \   <!-- AI Learning -->\n    <a class=\"card card-ai active\" href=\"https://ai.learning.home\"
+    target=\"_blank\">\n      <div class=\"card-header\">\n        <div class=\"card-icon
+    icon-ai\">\U0001F916</div>\n        <span class=\"badge badge-live\">● Live</span>\n
+    \     </div>\n      <div>\n        <div class=\"card-title\">AI & LLMs</div>\n
+    \       <div class=\"card-sub\">ai.learning.home</div>\n      </div>\n      <p
+    class=\"card-desc\">Explore artificial intelligence, large language models, prompt
+    engineering, and AI-powered applications running locally on your GPU.</p>\n      <div
+    class=\"card-topics\">\n        <span class=\"topic-tag\">Ollama</span>\n        <span
+    class=\"topic-tag\">LLMs</span>\n        <span class=\"topic-tag\">Prompt Engineering</span>\n
+    \       <span class=\"topic-tag\">RAG</span>\n      </div>\n      <div class=\"card-footer\">\n
+    \       <span>Open WebUI • qwen2.5 • gemma2</span>\n        <span class=\"card-arrow\">→</span>\n
+    \     </div>\n    </a>\n\n    <!-- Linux Lab -->\n    <a class=\"card card-linux
+    active\" href=\"https://linux.learning.home\" target=\"_blank\">\n      <div class=\"card-header\">\n
+    \       <div class=\"card-icon icon-linux\">\U0001F427</div>\n        <span class=\"badge
+    badge-new\">✦ New</span>\n      </div>\n      <div>\n        <div class=\"card-title\">Linux
+    Mastery</div>\n        <div class=\"card-sub\">linux.learning.home</div>\n      </div>\n
+    \     <p class=\"card-desc\">Deep-dive into Linux internals with an interactive
+    terminal simulator and Ollama-powered quiz. Focus on networking, storage, LVM,
+    and security hardening.</p>\n      <div class=\"card-topics\">\n        <span
+    class=\"topic-tag\">Networking</span>\n        <span class=\"topic-tag\">Storage
+    & LVM</span>\n        <span class=\"topic-tag\">Security</span>\n        <span
+    class=\"topic-tag\">systemd</span>\n      </div>\n      <div class=\"card-footer\">\n
+    \       <span>Quiz + Terminal simulator</span>\n        <span class=\"card-arrow\">→</span>\n
+    \     </div>\n    </a>\n\n    <!-- Kubernetes -->\n    <a class=\"card card-k8s
+    active\" href=\"https://k8s.learning.home\" target=\"_blank\">\n      <div class=\"card-header\">\n
+    \       <div class=\"card-icon icon-k8s\">☸️</div>\n        <span class=\"badge
+    badge-live\">● Live</span>\n      </div>\n      <div>\n        <div class=\"card-title\">Kubernetes</div>\n
+    \       <div class=\"card-sub\">k8s.learning.home</div>\n      </div>\n      <p
+    class=\"card-desc\">Learn Kubernetes concepts, from pods and deployments to operators
+    and custom controllers — practised on your own 3-node cluster.</p>\n      <div
+    class=\"card-topics\">\n        <span class=\"topic-tag\">Pods & Deployments</span>\n
+    \       <span class=\"topic-tag\">Ingress</span>\n        <span class=\"topic-tag\">Operators</span>\n
+    \       <span class=\"topic-tag\">Helm</span>\n      </div>\n      <div class=\"card-footer\">\n
+    \       <span>K8s Platform Academy</span>\n        <span class=\"card-arrow\">→</span>\n
+    \     </div>\n    </a>\n\n    <!-- Istio -->\n    <a class=\"card card-istio active\"
+    href=\"https://istio.learning.home\" target=\"_blank\">\n      <div class=\"card-header\">\n
+    \       <div class=\"card-icon icon-istio\">\U0001F310</div>\n        <span class=\"badge
+    badge-live\">● Live</span>\n      </div>\n      <div>\n        <div class=\"card-title\">Istio
+    & Service Mesh</div>\n        <div class=\"card-sub\">istio.learning.home</div>\n
+    \     </div>\n      <p class=\"card-desc\">Master service mesh concepts — traffic
+    management, mutual TLS, observability with Kiali and Jaeger, and advanced routing
+    patterns.</p>\n      <div class=\"card-topics\">\n        <span class=\"topic-tag\">Traffic
+    Management</span>\n        <span class=\"topic-tag\">mTLS</span>\n        <span
+    class=\"topic-tag\">Observability</span>\n        <span class=\"topic-tag\">Envoy</span>\n
+    \     </div>\n      <div class=\"card-footer\">\n        <span>Istio Learning
+    Hub</span>\n        <span class=\"card-arrow\">→</span>\n      </div>\n    </a>\n\n
+    \ </div>\n\n  <div class=\"section-label\">Coming Soon</div>\n  <div class=\"cards\">\n\n
+    \   <div class=\"card card-future coming-soon\">\n      <div class=\"card-header\">\n
+    \       <div class=\"card-icon icon-future\">\U0001F40D</div>\n        <span class=\"badge
+    badge-soon\">Coming soon</span>\n      </div>\n      <div>\n        <div class=\"card-title\">Python
+    & Automation</div>\n        <div class=\"card-sub\">python.learning.home</div>\n
+    \     </div>\n      <p class=\"card-desc\">Scripting, automation, FastAPI, and
+    building tools that integrate with your homelab.</p>\n      <div class=\"card-topics\">\n
+    \       <span class=\"topic-tag\">Scripting</span>\n        <span class=\"topic-tag\">FastAPI</span>\n
+    \       <span class=\"topic-tag\">Automation</span>\n      </div>\n      <div
+    class=\"card-footer\"><span></span></div>\n    </div>\n\n    <div class=\"card
+    card-future coming-soon\">\n      <div class=\"card-header\">\n        <div class=\"card-icon
+    icon-future\">\U0001F512</div>\n        <span class=\"badge badge-soon\">Coming
+    soon</span>\n      </div>\n      <div>\n        <div class=\"card-title\">Security
+    & Hardening</div>\n        <div class=\"card-sub\">security.learning.home</div>\n
+    \     </div>\n      <p class=\"card-desc\">Penetration testing basics, CVE analysis,
+    Vault secrets management, and homelab security auditing.</p>\n      <div class=\"card-topics\">\n
+    \       <span class=\"topic-tag\">Vault</span>\n        <span class=\"topic-tag\">SELinux</span>\n
+    \       <span class=\"topic-tag\">Pen Testing</span>\n      </div>\n      <div
+    class=\"card-footer\"><span></span></div>\n    </div>\n\n    <div class=\"card
+    card-future coming-soon\">\n      <div class=\"card-header\">\n        <div class=\"card-icon
+    icon-future\">\U0001F4CA</div>\n        <span class=\"badge badge-soon\">Coming
+    soon</span>\n      </div>\n      <div>\n        <div class=\"card-title\">Observability</div>\n
+    \       <div class=\"card-sub\">obs.learning.home</div>\n      </div>\n      <p
+    class=\"card-desc\">Prometheus, Grafana, Loki, and distributed tracing — using
+    your own monitoring stack as the lab environment.</p>\n      <div class=\"card-topics\">\n
+    \       <span class=\"topic-tag\">Prometheus</span>\n        <span class=\"topic-tag\">Grafana</span>\n
+    \       <span class=\"topic-tag\">Loki</span>\n      </div>\n      <div class=\"card-footer\"><span></span></div>\n
+    \   </div>\n\n  </div>\n\n  <div class=\"section-label\">Homelab Stack</div>\n
+    \ <div class=\"stack\">\n    <span class=\"stack-label\">Powered by →</span>\n
+    \   <div class=\"stack-item\"><div class=\"stack-dot dot-green\"></div>Kubernetes
+    3-node</div>\n    <div class=\"stack-item\"><div class=\"stack-dot dot-blue\"></div>Ollama
+    (GPU)</div>\n    <div class=\"stack-item\"><div class=\"stack-dot dot-purple\"></div>ArgoCD</div>\n
+    \   <div class=\"stack-item\"><div class=\"stack-dot dot-teal\"></div>cert-manager</div>\n
+    \   <div class=\"stack-item\"><div class=\"stack-dot dot-orange\"></div>n8n</div>\n
+    \   <div class=\"stack-item\"><div class=\"stack-dot dot-yellow\"></div>Plane</div>\n
+    \   <div class=\"stack-item\"><div class=\"stack-dot dot-blue\"></div>Nextcloud</div>\n
+    \ </div>\n</main>\n\n<footer>\n  Learning Hub • Your homelab, your curriculum\n</footer>\n\n</body>\n</html>\n"
+kind: ConfigMap
+metadata:
+  name: learning-hub-index

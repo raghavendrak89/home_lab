@@ -1,0 +1,97 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: learning-hub-nginx
+  namespace: my-learning
+data:
+  default.conf: |
+    server {
+      listen 80;
+      root /usr/share/nginx/html;
+      index index.html;
+      location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache";
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learning-hub
+  namespace: my-learning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learning-hub
+  template:
+    metadata:
+      labels:
+        app: learning-hub
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "24Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+      volumes:
+        - name: html
+          configMap:
+            name: learning-hub-index
+        - name: config
+          configMap:
+            name: learning-hub-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learning-hub
+  namespace: my-learning
+spec:
+  selector:
+    app: learning-hub
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: learning-hub
+  namespace: my-learning
+  annotations:
+    cert-manager.io/cluster-issuer: homelab-ca-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - learning.home
+      secretName: learning-hub-tls
+  rules:
+    - host: learning.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: learning-hub
+                port:
+                  number: 80

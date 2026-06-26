@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Hub</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --green: #3fb950;
+      --blue: #58a6ff;
+      --purple: #bc8cff;
+      --yellow: #d29922;
+      --orange: #db6d28;
+      --red: #f85149;
+      --teal: #39d4c8;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1em;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo-dot {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #58a6ff, #bc8cff);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 4px;
+    }
+    .nav-link {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: .85em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .nav-link:hover { background: var(--border); color: var(--text); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 56px 32px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(88, 166, 255, .1);
+      border: 1px solid rgba(88, 166, 255, .25);
+      color: var(--blue);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: .78em;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 2.4em;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #e6edf3 0%, #8b949e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.05em;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.65;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 28px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-num {
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-label {
+      font-size: .78em;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Main content ── */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 32px 64px;
+    }
+    .section-label {
+      font-size: .78em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .card:hover {
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    }
+    .card:hover::before { opacity: 1; }
+    .card.active:hover { border-color: transparent; }
+
+    .card-ai::before   { background: linear-gradient(135deg, rgba(88,166,255,.12), rgba(188,140,255,.08)) border-box; border: 1px solid rgba(88,166,255,.5); }
+    .card-linux::before { background: linear-gradient(135deg, rgba(63,185,80,.12), rgba(57,212,200,.08)) border-box; border: 1px solid rgba(63,185,80,.5); }
+    .card-k8s::before  { background: linear-gradient(135deg, rgba(88,166,255,.12), rgba(57,212,200,.12)) border-box; border: 1px solid rgba(57,212,200,.5); }
+    .card-istio::before { background: linear-gradient(135deg, rgba(188,140,255,.12), rgba(248,81,73,.08)) border-box; border: 1px solid rgba(188,140,255,.5); }
+    .card-future::before { background: linear-gradient(135deg, rgba(210,153,34,.08), rgba(219,109,40,.06)) border-box; border: 1px solid rgba(210,153,34,.3); }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .icon-ai    { background: rgba(88,166,255,.15); }
+    .icon-linux { background: rgba(63,185,80,.15); }
+    .icon-k8s   { background: rgba(57,212,200,.15); }
+    .icon-istio { background: rgba(188,140,255,.15); }
+    .icon-future{ background: rgba(210,153,34,.1); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .card-title {
+      font-size: 1.05em;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .card-sub {
+      font-size: .78em;
+      color: var(--muted);
+      font-family: 'Courier New', monospace;
+    }
+    .badge {
+      padding: 2px 9px;
+      border-radius: 10px;
+      font-size: .7em;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-live   { background: rgba(63,185,80,.15);  color: var(--green); }
+    .badge-new    { background: rgba(88,166,255,.15);  color: var(--blue); }
+    .badge-soon   { background: rgba(139,148,158,.1);  color: var(--muted); }
+
+    .card-desc {
+      font-size: .88em;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+    .card-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .topic-tag {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: .72em;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: .8em;
+      color: var(--muted);
+    }
+    .card-arrow {
+      color: var(--muted);
+      transition: transform .2s, color .2s;
+    }
+    .card:hover .card-arrow {
+      transform: translateX(4px);
+      color: var(--blue);
+    }
+
+    .card.coming-soon {
+      opacity: .6;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* ── Stack section ── */
+    .stack {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+    .stack-label {
+      font-size: .8em;
+      color: var(--muted);
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+    .stack-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: .82em;
+      color: var(--text);
+    }
+    .stack-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+    .dot-green  { background: var(--green); }
+    .dot-blue   { background: var(--blue); }
+    .dot-purple { background: var(--purple); }
+    .dot-teal   { background: var(--teal); }
+    .dot-orange { background: var(--orange); }
+    .dot-yellow { background: var(--yellow); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: .78em;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.7em; }
+      header { padding: 0 16px; }
+      .hero, main { padding-left: 16px; padding-right: 16px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <div class="logo-dot">🎓</div>
+    Learning Hub
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="https://ai.learning.home" target="_blank">AI</a>
+    <a class="nav-link" href="https://linux.learning.home" target="_blank">Linux</a>
+    <a class="nav-link" href="https://k8s.learning.home" target="_blank">Kubernetes</a>
+    <a class="nav-link" href="https://istio.learning.home" target="_blank">Istio</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">🏠 Homelab Learning Portal</div>
+  <h1>Your personal<br>learning space</h1>
+  <p>Everything you're learning, powered by your own homelab — Ollama, Kubernetes, and your own stack.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num" id="active-count">4</span>
+      <span class="stat-label">Active courses</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">3</span>
+      <span class="stat-label">Nodes running</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">🟢</span>
+      <span class="stat-label">All systems up</span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="section-label">Active Learning</div>
+  <div class="cards">
+
+    <!-- AI Learning -->
+    <a class="card card-ai active" href="https://ai.learning.home" target="_blank">
+      <div class="card-header">
+        <div class="card-icon icon-ai">🤖</div>
+        <span class="badge badge-live">● Live</span>
+      </div>
+      <div>
+        <div class="card-title">AI & LLMs</div>
+        <div class="card-sub">ai.learning.home</div>
+      </div>
+      <p class="card-desc">Explore artificial intelligence, large language models, prompt engineering, and AI-powered applications running locally on your GPU.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Ollama</span>
+        <span class="topic-tag">LLMs</span>
+        <span class="topic-tag">Prompt Engineering</span>
+        <span class="topic-tag">RAG</span>
+      </div>
+      <div class="card-footer">
+        <span>Open WebUI • qwen2.5 • gemma2</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Linux Lab -->
+    <a class="card card-linux active" href="https://linux.learning.home" target="_blank">
+      <div class="card-header">
+        <div class="card-icon icon-linux">🐧</div>
+        <span class="badge badge-new">✦ New</span>
+      </div>
+      <div>
+        <div class="card-title">Linux Mastery</div>
+        <div class="card-sub">linux.learning.home</div>
+      </div>
+      <p class="card-desc">Deep-dive into Linux internals with an interactive terminal simulator and Ollama-powered quiz. Focus on networking, storage, LVM, and security hardening.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Networking</span>
+        <span class="topic-tag">Storage & LVM</span>
+        <span class="topic-tag">Security</span>
+        <span class="topic-tag">systemd</span>
+      </div>
+      <div class="card-footer">
+        <span>Quiz + Terminal simulator</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Kubernetes -->
+    <a class="card card-k8s active" href="https://k8s.learning.home" target="_blank">
+      <div class="card-header">
+        <div class="card-icon icon-k8s">☸️</div>
+        <span class="badge badge-live">● Live</span>
+      </div>
+      <div>
+        <div class="card-title">Kubernetes</div>
+        <div class="card-sub">k8s.learning.home</div>
+      </div>
+      <p class="card-desc">Learn Kubernetes concepts, from pods and deployments to operators and custom controllers — practised on your own 3-node cluster.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Pods & Deployments</span>
+        <span class="topic-tag">Ingress</span>
+        <span class="topic-tag">Operators</span>
+        <span class="topic-tag">Helm</span>
+      </div>
+      <div class="card-footer">
+        <span>K8s Platform Academy</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Istio -->
+    <a class="card card-istio active" href="https://istio.learning.home" target="_blank">
+      <div class="card-header">
+        <div class="card-icon icon-istio">🌐</div>
+        <span class="badge badge-live">● Live</span>
+      </div>
+      <div>
+        <div class="card-title">Istio & Service Mesh</div>
+        <div class="card-sub">istio.learning.home</div>
+      </div>
+      <p class="card-desc">Master service mesh concepts — traffic management, mutual TLS, observability with Kiali and Jaeger, and advanced routing patterns.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Traffic Management</span>
+        <span class="topic-tag">mTLS</span>
+        <span class="topic-tag">Observability</span>
+        <span class="topic-tag">Envoy</span>
+      </div>
+      <div class="card-footer">
+        <span>Istio Learning Hub</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label">Coming Soon</div>
+  <div class="cards">
+
+    <div class="card card-future coming-soon">
+      <div class="card-header">
+        <div class="card-icon icon-future">🐍</div>
+        <span class="badge badge-soon">Coming soon</span>
+      </div>
+      <div>
+        <div class="card-title">Python & Automation</div>
+        <div class="card-sub">python.learning.home</div>
+      </div>
+      <p class="card-desc">Scripting, automation, FastAPI, and building tools that integrate with your homelab.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Scripting</span>
+        <span class="topic-tag">FastAPI</span>
+        <span class="topic-tag">Automation</span>
+      </div>
+      <div class="card-footer"><span></span></div>
+    </div>
+
+    <div class="card card-future coming-soon">
+      <div class="card-header">
+        <div class="card-icon icon-future">🔒</div>
+        <span class="badge badge-soon">Coming soon</span>
+      </div>
+      <div>
+        <div class="card-title">Security & Hardening</div>
+        <div class="card-sub">security.learning.home</div>
+      </div>
+      <p class="card-desc">Penetration testing basics, CVE analysis, Vault secrets management, and homelab security auditing.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Vault</span>
+        <span class="topic-tag">SELinux</span>
+        <span class="topic-tag">Pen Testing</span>
+      </div>
+      <div class="card-footer"><span></span></div>
+    </div>
+
+    <div class="card card-future coming-soon">
+      <div class="card-header">
+        <div class="card-icon icon-future">📊</div>
+        <span class="badge badge-soon">Coming soon</span>
+      </div>
+      <div>
+        <div class="card-title">Observability</div>
+        <div class="card-sub">obs.learning.home</div>
+      </div>
+      <p class="card-desc">Prometheus, Grafana, Loki, and distributed tracing — using your own monitoring stack as the lab environment.</p>
+      <div class="card-topics">
+        <span class="topic-tag">Prometheus</span>
+        <span class="topic-tag">Grafana</span>
+        <span class="topic-tag">Loki</span>
+      </div>
+      <div class="card-footer"><span></span></div>
+    </div>
+
+  </div>
+
+  <div class="section-label">Homelab Stack</div>
+  <div class="stack">
+    <span class="stack-label">Powered by →</span>
+    <div class="stack-item"><div class="stack-dot dot-green"></div>Kubernetes 3-node</div>
+    <div class="stack-item"><div class="stack-dot dot-blue"></div>Ollama (GPU)</div>
+    <div class="stack-item"><div class="stack-dot dot-purple"></div>ArgoCD</div>
+    <div class="stack-item"><div class="stack-dot dot-teal"></div>cert-manager</div>
+    <div class="stack-item"><div class="stack-dot dot-orange"></div>n8n</div>
+    <div class="stack-item"><div class="stack-dot dot-yellow"></div>Plane</div>
+    <div class="stack-item"><div class="stack-dot dot-blue"></div>Nextcloud</div>
+  </div>
+</main>
+
+<footer>
+  Learning Hub • Your homelab, your curriculum
+</footer>
+
+</body>
+</html>
