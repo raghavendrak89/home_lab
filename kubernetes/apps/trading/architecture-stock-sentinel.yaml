@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: architecture-stock-sentinel
+  namespace: trading
+  labels:
+    app.homelab/architecture: "true"
+data:
+  spec.yaml: |
+    name: "Stock Sentinel"
+    description: "AI-powered Indian stock analysis platform — technical, fundamental & sentiment signals unified into a BUY/HOLD/SELL recommendation with LLM narrative."
+    url: "http://stocks.trading.home"
+    icon: "📈"
+    k8s:
+      namespace: trading
+      deployment: stock-sentinel
+    diagram: |
+      graph TD
+        U([User Browser]) -->|HTTP| ING[Ingress-NGINX\nstocks.trading.home]
+        ING --> SVC[stock-sentinel\nService :80]
+        SVC --> POD[FastAPI Pod\n:8000]
+
+        POD -->|serves| FE["/  →  frontend/\nindex.html + script.js\n+ LightweightCharts"]
+
+        subgraph Data Sources
+          YF[yfinance\nNSE/BSE OHLCV, fundamentals\nearnings, peers, corp actions]
+          KITE[Zerodha Kite\nOptional — live quotes\nrequires OAuth token]
+          NEWS[NewsAPI\nfinancial headlines]
+          MACRO[yfinance macros\nNifty50, gold, USD/INR\nUS10Y, India10Y, VIX]
+          OAI[OpenAI GPT-4o-mini\nOptional LLM narrative]
+        end
+
+        POD -->|REST| YF
+        POD -->|REST + token| KITE
+        POD -->|REST| NEWS
+        POD -->|REST| MACRO
+        POD -->|REST API| OAI
+
+        subgraph Analysis Pipeline
+          TA[Technical Module\nRSI, MACD, BB, EMA, ATR\nVWAP, S/R, volume, patterns]
+          FA[Fundamental Module\nDCF intrinsic value, P/E, P/B\nROE, D/E, margins, Altman-Z]
+          SA[Sentiment Module\nFinBERT NLP  +  VADER\nweighted headline scoring]
+          AGG[Aggregator / Decision Engine\n40% Technical + 35% Fundamental\n+ 25% Sentiment → BUY/HOLD/SELL]
+          LLM[LLM Analyst\nGPT-4o-mini synthesis\nhuman-readable narrative]
+          BT[Backtester\nSMA crossover strategy\non historical OHLCV]
+        end
+
+        POD --> TA
+        POD --> FA
+        POD --> SA
+        TA --> AGG
+        FA --> AGG
+        SA --> AGG
+        AGG --> LLM
+
+        subgraph Storage - 5Gi PVC
+          DC[(DiskCache\nAPI response cache\nTTL-based per layer)]
+          MC[(Model Cache\nFinBERT weights\n~500 MB on first load)]
+          PF[(Price Cache\nOHLCV parquet files)]
+        end
+
+        POD -->|read/write| DC
+        POD -->|read/write| MC
+        POD -->|read/write| PF
+
+        subgraph Portfolio
+          PORT[Portfolio Manager\nhold positions in memory\nP&L, sector breakdown]
+          PVC2[(portfolio.json\non PVC)]
+        end
+
+        POD --> PORT
+        PORT -->|persist| PVC2
+
+        PROM[Prometheus\nmonitoring ns] -->|scrape :8000/metrics| POD
+    components:
+      - name: "FastAPI Backend (uvicorn)"
+        description: "Single-worker Python 3.11 process serving both the static frontend and all /api/* endpoints. Runs as UID 999 (non-root) with all Linux capabilities dropped. 17 API routes cover quotes, OHLCV, technical analysis, fundamentals, sentiment, full analysis, backtest, macro, peers, earnings, corporate actions, and portfolio CRUD."
+      - name: "Data Fetcher (yfinance + Kite)"
+        description: "Primary data source is yfinance — fetches NSE/BSE OHLCV, quote, fundamentals, earnings history, dividend history, and peer tickers. Zerodha Kite is an optional overlay for live intraday prices; it requires OAuth login via the /api/kite/* endpoints and its token is stored in the pod's environment (Kubernetes Secret)."
+      - name: "Technical Analysis Module"
+        description: "Computes all indicators in pure Python/NumPy — no third-party TA library. Indicators: 9/21/50/200-day EMA, RSI(14), MACD(12/26/9), Bollinger Bands, ATR, VWAP, volume ratio. Also detects S/R levels via pivot-point clustering and scores pattern signals (golden cross, death cross, MACD histogram). Emits a normalised score in [-1, +1]."
+      - name: "Fundamental Analysis Module"
+        description: "Parses yfinance info dict for P/E, P/B, EV/EBITDA, ROE, ROCE, D/E, current ratio, profit margin, revenue growth. Runs a DCF model (3-stage: 5yr high growth, 5yr transition, terminal) to compute intrinsic value and margin of safety. Also computes Altman Z-Score for bankruptcy risk. Emits a normalised score in [-1, +1]."
+      - name: "Sentiment Analysis Module"
+        description: "Fetches up to 20 recent headlines from NewsAPI for the ticker. Each headline is scored by both FinBERT (transformer, fine-tuned on financial text) and VADER (lexicon-based). Final sentiment is a 70/30 weighted average. FinBERT model weights (~500 MB) are downloaded on first boot and cached to the PVC model directory."
+      - name: "Aggregator & Decision Engine"
+        description: "Combines the three module scores with fixed weights (Technical 40%, Fundamental 35%, Sentiment 25%) into a composite score. Maps to BUY (score > +0.20), SELL (score < -0.20), or HOLD. Also collects risk flags from all three modules (extreme RSI, high D/E, earnings miss, sentiment divergence, etc.) and assembles a structured JSON report."
+      - name: "LLM Analyst (optional)"
+        description: "If OPENAI_API_KEY is set, sends the full aggregator report to GPT-4o-mini with a structured prompt and returns a human-readable 3-paragraph narrative covering technicals, fundamentals, and sentiment. Response is cached for 24 hours (configurable via LLM_CACHE_TTL) to minimise API cost. Falls back gracefully to no-narrative mode if the key is absent."
+      - name: "Backtester"
+        description: "Simple SMA crossover backtest (fast/slow window configurable) run over the same OHLCV period used for analysis. Returns equity curve, trade list, total return %, max drawdown, Sharpe ratio, and win rate so the user can see how the mechanical signal has performed historically."
+      - name: "Portfolio Manager"
+        description: "In-memory store (backed to portfolio.json on the PVC) of user holdings: ticker, quantity, buy price, buy date. Computes live P&L, returns, sector allocation, and a HHI-based concentration risk score. Supports add-holding and sell-holding mutations via POST/DELETE endpoints."
+      - name: "Macro Dashboard"
+        description: "Aggregates 6 macro indicators via yfinance: Nifty 50, Gold (GC=F), USD/INR, US 10Y yield, India 10Y yield, India VIX. Returns day change % and a trend label. Displayed as a fixed top strip in the UI."
+      - name: "Frontend SPA (vanilla JS)"
+        description: "Single-page app served from /app/frontend/. LightweightCharts v4 renders the main candlestick chart with EMA overlays, VWAP, and S/R price lines; a MACD sub-chart; and an RSI sub-chart. Trade signals from the backtester are overlaid as markers. Six tabs: Overview, Technical, Fundamental, Sentiment, Peers, and Portfolio. No build step — plain ES6 served as static files by FastAPI's StaticFiles mount."
+      - name: "DiskCache (response cache)"
+        description: "All external API responses are cached with per-layer TTLs: prices 5 min, fundamentals 1 hour, sentiment 30 min, LLM narratives 24 hours. Cache lives on the 5 Gi PVC so it survives pod restarts. Implemented with the diskcache library."
+      - name: "Prometheus Metrics"
+        description: "prometheus-fastapi-instrumentator auto-instruments every route with request count, latency histograms, and in-flight gauges, exposed at /metrics. Pod template carries prometheus.io/scrape=true annotations so the kube-prometheus-stack in the monitoring namespace scrapes it automatically."
+    decisions:
+      - "CPU-only PyTorch (torch==2.3.0+cpu) installed first in a dedicated RUN layer before requirements.txt — reduces image size from ~5 GB (CUDA) to 1.79 GB and avoids pip trying to re-download the CUDA wheel when requirements.txt is processed."
+      - "from __future__ import annotations removed from main.py — Pydantic v2 evaluates type annotations eagerly at import time; the future import makes all annotations lazy strings, causing PydanticUndefinedAnnotation at startup."
+      - "strategy: Recreate instead of RollingUpdate — single replica with a ReadWriteOnce PVC means two pods cannot run simultaneously; Recreate terminates the old pod before the new one starts."
+      - "FinBERT chosen over lighter VADER alone because financial text has domain-specific polarity that general lexicons miss (e.g. 'profit booking' is negative in Hindi-English finance but scores neutral in VADER)."
+      - "Aggregator weights (40/35/25) are fixed rather than ML-derived to keep the system explainable and debuggable — a pure black-box model would be hard to trust for personal investment decisions."
+      - "DCF uses 3-stage model (high-growth, transition, terminal) rather than single-stage Gordon Growth to better capture the non-linear trajectory of Indian growth stocks."
+      - "Portfolio JSON persisted to PVC rather than a database — a single-user app does not need the overhead of SQLite or Postgres; plain JSON is human-readable and easy to back up."
+      - "LLM narrative is optional and cached 24 hours — GPT-4o-mini costs ~$0.002 per analysis; caching prevents runaway API spend during repeated reloads of the same ticker."
+      - "Zerodha Kite integration is opt-in — yfinance covers NSE data with a 15-minute delay which is sufficient for swing/positional analysis; live data is only needed for intraday use."
+      - "Rate limiter (slowapi, 30 req/min per IP) added to prevent accidental hammering of upstream APIs from the browser during development."
