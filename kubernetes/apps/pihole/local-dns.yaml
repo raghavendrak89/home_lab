@@ -38,3 +38,4 @@ data:
     address=/infra.home/192.168.0.201
     address=/ideas.home/192.168.0.201
     address=/stocks.trading.home/192.168.0.201
+    address=/jobs.home/192.168.0.201
