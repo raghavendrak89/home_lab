@@ -139,9 +139,9 @@ alertmanager:
               {{ end }}
       - name: incident-commander
         webhook_configs:
-          # Replace REPLACE_WITH_WEBHOOK_SECRET with the value from:
+          # Replace f1928b985c8784b9eb6dc3eb96f17831cc97c79578d6c6eb44fa349f9c70bd3b with the value from:
           # kubectl get secret webhook-credentials -n incident-commander -o jsonpath='{.data.secret}' | base64 -d
-          - url: "https://incident.home/webhooks/alertmanager?secret=REPLACE_WITH_WEBHOOK_SECRET"
+          - url: "https://incident.home/webhooks/alertmanager?secret=f1928b985c8784b9eb6dc3eb96f17831cc97c79578d6c6eb44fa349f9c70bd3b"
             send_resolved: true
 
 # node-exporter runs on every node — needs privileged to access host metrics
