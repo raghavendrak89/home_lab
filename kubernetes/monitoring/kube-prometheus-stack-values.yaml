@@ -120,6 +120,10 @@ alertmanager:
         - receiver: email
           matchers:
             - alertname =~ ".*"
+        - receiver: incident-commander
+          continue: true
+          matchers:
+            - alertname =~ ".*"
     receivers:
       - name: email
         email_configs:
@@ -133,6 +137,12 @@ alertmanager:
               Details: {{ .Annotations.description }}
               Status: {{ .Status }}
               {{ end }}
+      - name: incident-commander
+        webhook_configs:
+          # Replace REPLACE_WITH_WEBHOOK_SECRET with the value from:
+          # kubectl get secret webhook-credentials -n incident-commander -o jsonpath='{.data.secret}' | base64 -d
+          - url: "https://incident.home/webhooks/alertmanager?secret=REPLACE_WITH_WEBHOOK_SECRET"
+            send_resolved: true
 
 # node-exporter runs on every node — needs privileged to access host metrics
 nodeExporter:
