@@ -1,0 +1,40 @@
+# Shared VIP in front of both Pi-hole instances. Selects the
+# pihole-role: dns-server label common to both pihole and pihole-b pods,
+# so MetalLB's L2 failover (gratuitous ARP to a healthy node) handles
+# outages at the network layer instead of relying on each client's
+# resolver to time out on a dead nameserver and retry the next one.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-vip-dns-tcp
+  namespace: pihole
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.205
+    metallb.universe.tf/allow-shared-ip: pihole-vip-dns
+spec:
+  type: LoadBalancer
+  selector:
+    pihole-role: dns-server
+  ports:
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-vip-dns-udp
+  namespace: pihole
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.205
+    metallb.universe.tf/allow-shared-ip: pihole-vip-dns
+spec:
+  type: LoadBalancer
+  selector:
+    pihole-role: dns-server
+  ports:
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
