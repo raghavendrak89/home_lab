@@ -48,6 +48,10 @@ grafana:
         gnetId: 12239
         revision: 2
         datasource: Prometheus
+      pihole:
+        gnetId: 10176
+        revision: 1
+        datasource: Prometheus
       node-exporter:
         gnetId: 1860
         revision: 37

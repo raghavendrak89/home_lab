@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pihole-alerts
+  namespace: pihole
+  labels:
+    app: kube-prometheus-stack
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: pihole.rules
+      rules:
+        - alert: PiholeDown
+          expr: kube_deployment_status_replicas_available{deployment="pihole", namespace="pihole"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pi-hole is down"
+            description: "Pi-hole deployment has 0 available replicas. DNS resolution and ad-blocking are down for the whole LAN."
+
+        - alert: PiholeExporterDown
+          expr: up{job="pihole-exporter"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pi-hole exporter unreachable"
+            description: "Prometheus can't scrape pihole-exporter for 5 minutes — Pi-hole metrics are stale (Pi-hole itself may still be serving DNS)."
+
+        - alert: PiholeBlockingDisabled
+          expr: pihole_status == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pi-hole ad-blocking disabled"
+            description: "Pi-hole blocking has been disabled for 10+ minutes — likely left off after a manual toggle."
