@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-b-exporter
+  namespace: pihole
+  labels:
+    app: pihole-b-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole-b-exporter
+  template:
+    metadata:
+      labels:
+        app: pihole-b-exporter
+    spec:
+      containers:
+        - name: pihole-exporter
+          image: ekofr/pihole-exporter:v0.4.0
+          env:
+            - name: PIHOLE_HOSTNAME
+              value: "pihole-b-admin.pihole.svc.cluster.local"
+            - name: PIHOLE_PORT
+              value: "80"
+            - name: PIHOLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-secret
+                  key: WEBPASSWORD
+            - name: INTERVAL
+              value: "30s"
+          ports:
+            - name: metrics
+              containerPort: 9617
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-b-exporter
+  namespace: pihole
+  labels:
+    app: pihole-b-exporter
+spec:
+  selector:
+    app: pihole-b-exporter
+  ports:
+    - name: metrics
+      port: 9617
+      targetPort: 9617
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pihole-b-exporter
+  namespace: pihole
+  labels:
+    app: pihole-b-exporter
+spec:
+  selector:
+    matchLabels:
+      app: pihole-b-exporter
+  endpoints:
+    - port: metrics
+      interval: 30s

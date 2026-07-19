@@ -16,8 +16,26 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "Pi-hole is down"
-            description: "Pi-hole deployment has 0 available replicas. DNS resolution and ad-blocking are down for the whole LAN."
+            summary: "Pi-hole (primary) is down"
+            description: "Pi-hole primary deployment has 0 available replicas. pihole-b (192.168.0.204) should still be serving DNS/.home if configured as a secondary resolver."
+
+        - alert: PiholeBDown
+          expr: kube_deployment_status_replicas_available{deployment="pihole-b", namespace="pihole"} == 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pi-hole (secondary/HA) is down"
+            description: "pihole-b deployment has 0 available replicas. The primary Pi-hole is still up, but there's no HA fallback until this is fixed."
+
+        - alert: PiholeBothDown
+          expr: kube_deployment_status_replicas_available{deployment="pihole", namespace="pihole"} == 0 and kube_deployment_status_replicas_available{deployment="pihole-b", namespace="pihole"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "BOTH Pi-hole instances are down"
+            description: "Neither pihole nor pihole-b has an available replica. DNS resolution and ad-blocking are down for the whole LAN."
 
         - alert: PiholeExporterDown
           expr: up{job="pihole-exporter"} == 0

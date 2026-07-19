@@ -11,6 +11,7 @@ data:
     address=/prometheus.home/192.168.0.201
     address=/alertmanager.home/192.168.0.201
     address=/pihole.home/192.168.0.201
+    address=/pihole-b.home/192.168.0.201
     address=/searxng.home/192.168.0.201
     address=/argocd.home/192.168.0.201
     address=/ollama.home/192.168.0.201

@@ -1,9 +1,9 @@
 ---
-# PVCs
+# PVCs (independent from the primary -- separate gravity DB, own state)
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pihole-config
+  name: pihole-b-config
   namespace: pihole
 spec:
   accessModes: [ReadWriteOnce]
@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pihole-dnsmasq
+  name: pihole-b-dnsmasq
   namespace: pihole
 spec:
   accessModes: [ReadWriteOnce]
@@ -24,21 +24,25 @@ spec:
     requests:
       storage: 100Mi
 ---
-# Deployment
+# Deployment -- second independent Pi-hole instance for HA.
+# Mirrors kubernetes/apps/pihole/pihole.yaml (same DoH/DNSSEC sidecar,
+# same shared .home ConfigMap) but with its own storage/gravity DB, and
+# podAntiAffinity (pihole-role: dns-server) keeps it off whatever node
+# the primary lands on.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pihole
+  name: pihole-b
   namespace: pihole
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: pihole
+      app: pihole-b
   template:
     metadata:
       labels:
-        app: pihole
+        app: pihole-b
         pihole-role: dns-server
     spec:
       nodeSelector:
@@ -130,10 +134,10 @@ spec:
             name: dnscrypt-proxy-config
         - name: pihole-config
           persistentVolumeClaim:
-            claimName: pihole-config
+            claimName: pihole-b-config
         - name: pihole-dnsmasq
           persistentVolumeClaim:
-            claimName: pihole-dnsmasq
+            claimName: pihole-b-dnsmasq
         - name: local-dns
           configMap:
             name: pihole-local-dns
@@ -142,15 +146,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pihole-dns-tcp
+  name: pihole-b-dns-tcp
   namespace: pihole
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 192.168.0.202
-    metallb.universe.tf/allow-shared-ip: pihole-dns
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.204
+    metallb.universe.tf/allow-shared-ip: pihole-b-dns
 spec:
   type: LoadBalancer
   selector:
-    app: pihole
+    app: pihole-b
   ports:
     - name: dns-tcp
       port: 53
@@ -161,15 +165,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pihole-dns-udp
+  name: pihole-b-dns-udp
   namespace: pihole
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 192.168.0.202
-    metallb.universe.tf/allow-shared-ip: pihole-dns
+    metallb.universe.tf/loadBalancerIPs: 192.168.0.204
+    metallb.universe.tf/allow-shared-ip: pihole-b-dns
 spec:
   type: LoadBalancer
   selector:
-    app: pihole
+    app: pihole-b
   ports:
     - name: dns-udp
       port: 53
@@ -180,21 +184,21 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: pihole
+  name: pihole-b
   namespace: pihole
   annotations:
     nginx.ingress.kubernetes.io/app-root: /admin/
 spec:
   ingressClassName: nginx
   rules:
-    - host: pihole.home
+    - host: pihole-b.home
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: pihole-admin
+                name: pihole-b-admin
                 port:
                   number: 80
 ---
@@ -202,12 +206,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pihole-admin
+  name: pihole-b-admin
   namespace: pihole
 spec:
   type: ClusterIP
   selector:
-    app: pihole
+    app: pihole-b
   ports:
     - name: http
       port: 80
