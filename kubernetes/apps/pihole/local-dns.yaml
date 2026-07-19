@@ -25,6 +25,7 @@ data:
     address=/userv.home/192.168.0.193
     address=/switch.home/192.168.0.10
     address=/pbs.home/192.168.0.20
+    address=/claude-code-01.home/192.168.0.172
     address=/vault.home/192.168.0.201
     address=/nextcloud.home/192.168.0.201
     address=/comfyui.home/192.168.0.201
