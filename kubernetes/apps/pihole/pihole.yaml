@@ -54,9 +54,11 @@ spec:
                   name: pihole-secret
                   key: WEBPASSWORD
             - name: PIHOLE_DNS_
-              value: "8.8.8.8;8.8.4.4"
+              value: "127.0.0.1#5053"
             - name: DNSMASQ_LISTENING
               value: "all"
+            - name: DNSSEC
+              value: "true"
           ports:
             - containerPort: 53
               protocol: TCP
@@ -91,6 +93,29 @@ spec:
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 10
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args:
+            - proxy-dns
+            - --address=127.0.0.1
+            - --port=5053
+            - --upstream=https://1.1.1.1/dns-query
+            - --upstream=https://1.0.0.1/dns-query
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: ["ALL"]
       volumes:
         - name: pihole-config
           persistentVolumeClaim:
