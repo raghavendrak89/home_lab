@@ -93,14 +93,12 @@ spec:
               port: 80
             initialDelaySeconds: 30
             periodSeconds: 10
-        - name: cloudflared
-          image: cloudflare/cloudflared:latest
-          args:
-            - proxy-dns
-            - --address=127.0.0.1
-            - --port=5053
-            - --upstream=https://1.1.1.1/dns-query
-            - --upstream=https://1.0.0.1/dns-query
+        - name: dnscrypt-proxy
+          image: klutchell/dnscrypt-proxy:latest
+          volumeMounts:
+            - name: dnscrypt-proxy-config
+              mountPath: /config/dnscrypt-proxy.toml
+              subPath: dnscrypt-proxy.toml
           resources:
             requests:
               cpu: "10m"
@@ -117,6 +115,9 @@ spec:
             capabilities:
               drop: ["ALL"]
       volumes:
+        - name: dnscrypt-proxy-config
+          configMap:
+            name: dnscrypt-proxy-config
         - name: pihole-config
           persistentVolumeClaim:
             claimName: pihole-config

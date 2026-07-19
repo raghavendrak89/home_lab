@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dnscrypt-proxy-config
+  namespace: pihole
+data:
+  dnscrypt-proxy.toml: |
+    listen_addresses = ['127.0.0.1:5053']
+    server_names = ['cloudflare']
+    ipv6_servers = false
+    require_dnssec = true
+    require_nolog = true
