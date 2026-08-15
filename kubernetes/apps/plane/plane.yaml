@@ -314,6 +314,7 @@ spec:
         - name: worker
           image: makeplane/plane-backend:stable
           command: ["./bin/docker-entrypoint-worker.sh"]
+          # bumped from 256Mi/512Mi 2026-08-15 - was getting OOMKilled even with ample node headroom
           envFrom:
             - secretRef:
                 name: plane-secret
@@ -349,10 +350,10 @@ spec:
           resources:
             requests:
               cpu: "100m"
-              memory: "256Mi"
+              memory: "512Mi"
             limits:
               cpu: "500m"
-              memory: "512Mi"
+              memory: "1Gi"
 ---
 # Beat Worker (scheduler)
 apiVersion: apps/v1
