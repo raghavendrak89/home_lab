@@ -46,3 +46,5 @@ data:
     address=/construction.home/192.168.0.201
     address=/dotfiles.home/192.168.0.201
     address=/homeassistant.home/192.168.0.201
+    address=/incident.home/192.168.0.201
+    address=/sysdesign.home/192.168.0.201
