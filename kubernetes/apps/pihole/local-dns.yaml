@@ -42,6 +42,7 @@ data:
     address=/stocks.trading.home/192.168.0.201
     address=/jobs.home/192.168.0.201
     address=/atlas.home/192.168.0.201
+    address=/raghu.home/192.168.0.201
     address=/dahua.home/192.168.0.201
     address=/construction.home/192.168.0.201
     address=/dotfiles.home/192.168.0.201
