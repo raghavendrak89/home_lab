@@ -54,6 +54,21 @@ spec:
                       operator: In
                       values: ["dns-server"]
                 topologyKey: kubernetes.io/hostname
+      initContainers:
+        - name: sync-local-dns
+          image: pihole/pihole:2026.07.2
+          command: ["/bin/sh", "/scripts/sync-local-dns.sh"]
+          securityContext:
+            capabilities:
+              add: [NET_ADMIN]
+          volumeMounts:
+            - name: pihole-config
+              mountPath: /etc/pihole
+            - name: local-dns
+              mountPath: /config/homelab.conf
+              subPath: homelab.conf
+            - name: sync-script
+              mountPath: /scripts
       containers:
         - name: pihole
           image: pihole/pihole:2026.07.2
@@ -139,6 +154,10 @@ spec:
         - name: local-dns
           configMap:
             name: pihole-local-dns
+        - name: sync-script
+          configMap:
+            name: pihole-sync-local-dns-script
+            defaultMode: 0755
 ---
 # DNS Service TCP (port 53)
 apiVersion: v1

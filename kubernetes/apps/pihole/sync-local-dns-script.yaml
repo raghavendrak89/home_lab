@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-sync-local-dns-script
+  namespace: pihole
+data:
+  sync-local-dns.sh: |
+    #!/bin/sh
+    # Pi-hole v6.7+ dropped support for /etc/dnsmasq.d/*.conf includes; local
+    # DNS records now live in pihole.toml's dns.hosts array. This initContainer
+    # translates the dnsmasq-style ConfigMap (still the GitOps source of truth)
+    # into that array on every pod start, so local-dns.yaml keeps working.
+    set -e
+    ENTRIES=""
+    while IFS= read -r line; do
+      case "$line" in
+        address=*)
+          rest="${line#address=/}"
+          domain="${rest%%/*}"
+          ip="${rest#*/}"
+          entry="\"$ip $domain\""
+          if [ -z "$ENTRIES" ]; then
+            ENTRIES="$entry"
+          else
+            ENTRIES="$ENTRIES,$entry"
+          fi
+          ;;
+      esac
+    done < /config/homelab.conf
+    pihole-FTL --config dns.hosts "[$ENTRIES]"
