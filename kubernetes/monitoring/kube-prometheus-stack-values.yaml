@@ -5,10 +5,10 @@ grafana:
   resources:
     requests:
       cpu: "200m"
-      memory: "256Mi"
+      memory: "512Mi"
     limits:
       cpu: "1"
-      memory: "512Mi"
+      memory: "1536Mi"
 
   additionalDataSources:
     - name: Loki
