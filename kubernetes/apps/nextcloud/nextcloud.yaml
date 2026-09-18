@@ -145,7 +145,7 @@ spec:
     spec:
       containers:
         - name: nextcloud
-          image: nextcloud:30-apache
+          image: nextcloud:31-apache
           env:
             - name: NEXTCLOUD_TRUSTED_DOMAINS
               value: "nextcloud.home"
