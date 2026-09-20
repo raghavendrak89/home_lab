@@ -1,14 +1,11 @@
 grafana:
+  # grafana.resources is set in kube-prometheus-stack-values.secret.yaml, not here -
+  # that file is passed as the second -f and wins the merge, so a resources block
+  # here would be silently shadowed (found 2026-09-20 after two separate "fixes" to
+  # this exact block here never actually took effect on the live Deployment).
   adminPassword: "changeme"
   plugins:
     - grafana-llm-app
-  resources:
-    requests:
-      cpu: "200m"
-      memory: "512Mi"
-    limits:
-      cpu: "1"
-      memory: "1536Mi"
 
   additionalDataSources:
     - name: Loki
