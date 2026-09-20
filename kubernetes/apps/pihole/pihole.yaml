@@ -56,7 +56,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
       initContainers:
         - name: sync-local-dns
-          image: pihole/pihole:2026.07.2
+          image: pihole/pihole:2026.09.0
           command: ["/bin/sh", "/scripts/sync-local-dns.sh"]
           securityContext:
             capabilities:
@@ -71,7 +71,7 @@ spec:
               mountPath: /scripts
       containers:
         - name: pihole
-          image: pihole/pihole:2026.07.2
+          image: pihole/pihole:2026.09.0
           env:
             - name: TZ
               value: "Australia/Melbourne"
