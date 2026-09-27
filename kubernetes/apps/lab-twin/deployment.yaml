@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-twin
+  namespace: lab-twin
+  labels:
+    app: lab-twin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab-twin
+  template:
+    metadata:
+      labels:
+        app: lab-twin
+    spec:
+      serviceAccountName: lab-twin
+      containers:
+        - name: lab-twin
+          image: docker.io/raghavendrak/lab-twin:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: PROMETHEUS_URL
+              value: "http://kube-prometheus-stack-prometheus.monitoring:9090"
+            - name: OLLAMA_URL
+              value: "http://ollama.ai.svc.cluster.local:11434"
+            - name: HOMELAB_VIZ_URL
+              value: "http://homelab-viz.homelab-viz.svc.cluster.local"
+            - name: HOMELAB_INGRESS_IP
+              value: "192.168.0.201"
+            - name: OLLAMA_USER
+              value: "raghavendra"
+            - name: OLLAMA_PASS
+              value: "ZXa0B7N5rVZN94QL52n1"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20

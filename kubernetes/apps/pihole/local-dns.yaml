@@ -50,3 +50,5 @@ data:
     address=/incident.home/192.168.0.201
     address=/sysdesign.home/192.168.0.201
     address=/learningai.home/192.168.0.201
+    address=/labtwin.home/192.168.0.201
+    address=/twin.home/192.168.0.201
