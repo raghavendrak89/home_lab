@@ -50,10 +50,12 @@ data:
     none;\n      font-size: 1em;\n      padding: 8px 12px;\n      border-radius: 10px;\n
     \     background: #f5f5ff;\n      display: block;\n      transition: background
     0.2s;\n    }\n\n    #creation-list a:hover {\n      background: #ebe6ff;\n    }\n
-    \ </style>\n</head>\n<body>\n  <div class=\"card\">\n    <h1>✨ Shona's Creative
-    Space</h1>\n    <p class=\"subtitle\">Type your idea and watch the magic happen!
-    \U0001F680</p>\n\n    <textarea\n      class=\"idea-box\"\n      id=\"idea\"\n
-    \     placeholder=\"What do you want to create today? \U0001F308&#10;&#10;e.g.
+    \ </style>\n</head>\n<body>\n  <div class=\"card\">\n    <div style=\"text-align:right;
+    margin-bottom: -10px;\">\n      <a href=\"/study.html\" style=\"color:#764ba2;
+    text-decoration:none; font-size:0.9em;\">\U0001F4DA Study Buddy →</a>\n    </div>\n
+    \   <h1>✨ Shona's Creative Space</h1>\n    <p class=\"subtitle\">Type your idea
+    and watch the magic happen! \U0001F680</p>\n\n    <textarea\n      class=\"idea-box\"\n
+    \     id=\"idea\"\n      placeholder=\"What do you want to create today? \U0001F308&#10;&#10;e.g.
     A game where I catch falling stars ⭐\"\n    ></textarea>\n\n    <br>\n    <button
     class=\"create-btn\" id=\"createBtn\" onclick=\"createMagic()\">\n      ✨ Create
     Magic!\n    </button>\n\n    <div class=\"status\" id=\"status\"></div>\n\n    <div

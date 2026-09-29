@@ -38,6 +38,18 @@ data:
         proxy_read_timeout 300s;
       }
 
+      # Study Buddy (study.html) talks to raghu's API through this same origin, so its
+      # session cookie and CSRF header work with no CORS config on either side. Host is
+      # rewritten to raghu.home — raghu's allowed_hosts allowlist only knows that name,
+      # not shona.home, and there's no reason to widen it just for an internal proxy hop.
+      location /api/ {
+        proxy_pass http://raghu-api.raghu.svc.cluster.local/api/;
+        proxy_set_header Host raghu.home;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 120s;
+        client_max_body_size 25m;
+      }
+
       location / {
         types {
           text/html html htm;
@@ -87,12 +99,19 @@ spec:
               mountPath: /files
         - name: copy-index
           image: busybox
-          command: ["sh", "-c", "cp /index-src/index.html /files/index.html"]
+          command:
+            - sh
+            - -c
+            - |
+              cp /index-src/index.html /files/index.html
+              cp /study-src/study.html /files/study.html
           volumeMounts:
             - name: files
               mountPath: /files
             - name: index-html
               mountPath: /index-src
+            - name: study-html
+              mountPath: /study-src
       containers:
         - name: nginx
           image: nginx:alpine
@@ -121,6 +140,9 @@ spec:
         - name: index-html
           configMap:
             name: shona-index
+        - name: study-html
+          configMap:
+            name: shona-study
 ---
 apiVersion: v1
 kind: Service
@@ -142,6 +164,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    # Needed so the raghu session cookie (Secure, set by /api/auth/login proxied through
+    # here) actually gets sent back by the browser — matches raghu's own ingress.
+    cert-manager.io/cluster-issuer: homelab-ca-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   rules:
@@ -155,3 +181,7 @@ spec:
                 name: shona-learning
                 port:
                   number: 80
+  tls:
+    - hosts:
+        - shona.home
+      secretName: shona-tls

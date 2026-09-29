@@ -1,0 +1,203 @@
+apiVersion: v1
+data:
+  study.html: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n
+    \ <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0\">\n
+    \ <title>Shona's Study Buddy \U0001F4DA</title>\n  <style>\n    * { box-sizing:
+    border-box; margin: 0; padding: 0; }\n\n    body {\n      min-height: 100vh;\n
+    \     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      font-family:
+    'Comic Sans MS', 'Chalkboard SE', cursive;\n      display: flex;\n      flex-direction:
+    column;\n      align-items: center;\n      padding: 16px;\n      padding-bottom:
+    90px;\n    }\n\n    .topbar {\n      width: 100%;\n      max-width: 700px;\n      display:
+    flex;\n      justify-content: space-between;\n      align-items: center;\n      color:
+    white;\n      margin-bottom: 14px;\n    }\n    .topbar h1 { font-size: 1.4em;
+    }\n    .topbar a { color: white; text-decoration: none; font-size: 0.9em; opacity:
+    0.9; }\n\n    .card {\n      background: white;\n      border-radius: 30px;\n
+    \     padding: 28px;\n      max-width: 700px;\n      width: 100%;\n      box-shadow:
+    0 20px 60px rgba(0,0,0,0.3);\n      min-height: 50vh;\n    }\n\n    .hidden {
+    display: none !important; }\n\n    /* --- Login --- */\n    #login-view input
+    {\n      width: 100%;\n      padding: 16px;\n      font-size: 1.2em;\n      font-family:
+    inherit;\n      border: 3px solid #667eea;\n      border-radius: 16px;\n      margin-bottom:
+    14px;\n    }\n    #login-view button, .big-btn {\n      width: 100%;\n      padding:
+    16px;\n      font-size: 1.3em;\n      font-family: inherit;\n      background:
+    linear-gradient(135deg, #667eea, #764ba2);\n      color: white;\n      border:
+    none;\n      border-radius: 50px;\n      cursor: pointer;\n      box-shadow: 0
+    8px 25px rgba(102,126,234,0.5);\n    }\n    #login-error { color: #e74c3c; margin-top:
+    10px; text-align: center; }\n\n    /* --- Tabs --- */\n    .tabbar {\n      position:
+    fixed;\n      bottom: 0; left: 0; right: 0;\n      display: flex;\n      background:
+    white;\n      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);\n      padding: 8px 0;\n
+    \     z-index: 10;\n    }\n    .tab-btn {\n      flex: 1;\n      background: none;\n
+    \     border: none;\n      font-family: inherit;\n      font-size: 0.75em;\n      padding:
+    8px 2px;\n      color: #999;\n      cursor: pointer;\n      border-radius: 12px;\n
+    \   }\n    .tab-btn .emoji { font-size: 1.6em; display: block; }\n    .tab-btn.active
+    { color: #764ba2; background: #f0ecff; }\n\n    h2 { color: #764ba2; margin-bottom:
+    16px; font-size: 1.4em; }\n\n    /* --- Chat --- */\n    #chat-log { display:
+    flex; flex-direction: column; gap: 10px; margin-bottom: 14px; max-height: 45vh;
+    overflow-y: auto; }\n    .msg { padding: 12px 16px; border-radius: 18px; max-width:
+    85%; font-size: 1.05em; }\n    .msg.me { align-self: flex-end; background: #667eea;
+    color: white; }\n    .msg.bot { align-self: flex-start; background: #f0ecff; color:
+    #333; }\n    .chat-input-row { display: flex; gap: 8px; }\n    .chat-input-row
+    input {\n      flex: 1;\n      padding: 14px;\n      font-size: 1.1em;\n      font-family:
+    inherit;\n      border: 3px solid #667eea;\n      border-radius: 16px;\n    }\n
+    \   .round-btn {\n      width: 54px; height: 54px;\n      border-radius: 50%;\n
+    \     border: none;\n      background: linear-gradient(135deg, #667eea, #764ba2);\n
+    \     color: white;\n      font-size: 1.4em;\n      cursor: pointer;\n    }\n
+    \   .round-btn.recording { background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }\n\n    /* --- Snap & Ask --- */\n    #snap-preview { max-width: 100%; border-radius:
+    16px; margin-top: 14px; display: none; }\n    #snap-result { margin-top: 16px;
+    font-size: 1.1em; line-height: 1.5; }\n    #snap-result .q { color: #764ba2; font-weight:
+    bold; margin-bottom: 8px; }\n\n    /* --- Homework --- */\n    .hw-item {\n      display:
+    flex;\n      justify-content: space-between;\n      align-items: center;\n      padding:
+    14px;\n      border-radius: 16px;\n      background: #f5f5ff;\n      margin-bottom:
+    10px;\n    }\n    .hw-item.done { opacity: 0.5; text-decoration: line-through;
+    }\n    .hw-item button { border: none; background: #27ae60; color: white; border-radius:
+    50%; width: 34px; height: 34px; cursor: pointer; }\n    .form-row { display: flex;
+    flex-direction: column; gap: 8px; margin-bottom: 16px; }\n    .form-row input,
+    .form-row textarea {\n      padding: 12px;\n      font-size: 1em;\n      font-family:
+    inherit;\n      border: 2px solid #ccc;\n      border-radius: 12px;\n    }\n\n
+    \   /* --- Reading --- */\n    .streak-badge {\n      text-align: center;\n      font-size:
+    3em;\n      margin: 10px 0;\n    }\n    .streak-label { text-align: center; color:
+    #888; margin-bottom: 20px; }\n\n    /* --- Timetable --- */\n    .day-row { margin-bottom:
+    14px; }\n    .day-row h3 { color: #764ba2; font-size: 1em; margin-bottom: 6px;
+    }\n    .period { background: #f5f5ff; border-radius: 10px; padding: 8px 12px;
+    margin-bottom: 4px; font-size: 0.95em; }\n\n    .status-msg { text-align: center;
+    color: #888; padding: 20px; }\n  </style>\n</head>\n<body>\n  <div class=\"topbar\">\n
+    \   <h1>\U0001F4DA Shona's Study Buddy</h1>\n    <a href=\"/\">\U0001F3A8 Creative
+    Space</a>\n  </div>\n\n  <div class=\"card\">\n    <!-- Login -->\n    <div id=\"login-view\">\n
+    \     <h2>Who's this? \U0001F44B</h2>\n      <input id=\"login-input\" placeholder=\"Your
+    login\" autocomplete=\"username\">\n      <input id=\"pass-input\" type=\"password\"
+    placeholder=\"Your passphrase\" autocomplete=\"current-password\">\n      <button
+    onclick=\"doLogin()\">Let's go! \U0001F680</button>\n      <div id=\"login-error\"></div>\n
+    \   </div>\n\n    <!-- Chat -->\n    <div id=\"chat-view\" class=\"hidden\">\n
+    \     <h2>\U0001F4AC Ask me anything</h2>\n      <div id=\"chat-log\"></div>\n
+    \     <div class=\"chat-input-row\">\n        <input id=\"chat-input\" placeholder=\"Type
+    here...\" onkeydown=\"if(event.key==='Enter')sendChat()\">\n        <button class=\"round-btn\"
+    id=\"mic-btn\" onclick=\"toggleRecording()\">\U0001F399️</button>\n        <button
+    class=\"round-btn\" onclick=\"sendChat()\">➤</button>\n      </div>\n    </div>\n\n
+    \   <!-- Snap & Ask -->\n    <div id=\"snap-view\" class=\"hidden\">\n      <h2>\U0001F4F8
+    Snap & Ask</h2>\n      <p style=\"color:#888; margin-bottom: 14px;\">Take a photo
+    of your homework question!</p>\n      <input type=\"file\" accept=\"image/*\"
+    capture=\"environment\" id=\"snap-file\" onchange=\"doSnapAsk()\" style=\"display:none\">\n
+    \     <button class=\"big-btn\" onclick=\"document.getElementById('snap-file').click()\">\U0001F4F7
+    Take a Photo</button>\n      <img id=\"snap-preview\">\n      <div id=\"snap-result\"></div>\n
+    \   </div>\n\n    <!-- Homework -->\n    <div id=\"homework-view\" class=\"hidden\">\n
+    \     <h2>\U0001F4DA Homework & Projects</h2>\n      <div class=\"form-row\">\n
+    \       <input id=\"hw-subject\" placeholder=\"Subject (e.g. Math)\">\n        <input
+    id=\"hw-desc\" placeholder=\"What is it?\">\n        <input id=\"hw-due\" type=\"date\">\n
+    \       <button class=\"big-btn\" onclick=\"addHomework()\">➕ Add</button>\n      </div>\n
+    \     <div id=\"hw-list\"></div>\n    </div>\n\n    <!-- Reading -->\n    <div
+    id=\"reading-view\" class=\"hidden\">\n      <h2>\U0001F4D6 Reading Streak</h2>\n
+    \     <div class=\"streak-badge\" id=\"streak-badge\">\U0001F525 0</div>\n      <div
+    class=\"streak-label\">days in a row!</div>\n      <div class=\"form-row\">\n
+    \       <input id=\"read-book\" placeholder=\"Book title\">\n        <input id=\"read-minutes\"
+    type=\"number\" placeholder=\"Minutes read\">\n        <button class=\"big-btn\"
+    onclick=\"logReading()\">✅ Log today's reading</button>\n      </div>\n    </div>\n\n
+    \   <!-- Timetable -->\n    <div id=\"timetable-view\" class=\"hidden\">\n      <h2>\U0001F5D3️
+    School Timetable</h2>\n      <div id=\"timetable-list\"></div>\n    </div>\n  </div>\n\n
+    \ <div class=\"tabbar\" id=\"tabbar\" style=\"display:none\">\n    <button class=\"tab-btn
+    active\" data-view=\"chat\"><span class=\"emoji\">\U0001F4AC</span>Chat</button>\n
+    \   <button class=\"tab-btn\" data-view=\"snap\"><span class=\"emoji\">\U0001F4F8</span>Snap</button>\n
+    \   <button class=\"tab-btn\" data-view=\"homework\"><span class=\"emoji\">\U0001F4DA</span>Homework</button>\n
+    \   <button class=\"tab-btn\" data-view=\"reading\"><span class=\"emoji\">\U0001F4D6</span>Reading</button>\n
+    \   <button class=\"tab-btn\" data-view=\"timetable\"><span class=\"emoji\">\U0001F5D3️</span>Timetable</button>\n
+    \ </div>\n\n  <script>\n    const DAY_NAMES = [\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\",\"Saturday\",\"Sunday\"];\n
+    \   let conversationId = null;\n    let mediaRecorder = null;\n    let audioChunks
+    = [];\n\n    async function api(path, opts = {}) {\n      opts.headers = Object.assign({
+    \"x-raghu-csrf\": \"1\" }, opts.headers || {});\n      opts.credentials = \"same-origin\";\n
+    \     const r = await fetch(\"/api\" + path, opts);\n      if (!r.ok) throw new
+    Error((await r.json().catch(() => ({}))).detail || r.statusText);\n      return
+    r.json();\n    }\n\n    async function doLogin() {\n      const login = document.getElementById(\"login-input\").value.trim();\n
+    \     const passphrase = document.getElementById(\"pass-input\").value;\n      document.getElementById(\"login-error\").textContent
+    = \"\";\n      try {\n        await api(\"/auth/login\", {\n          method:
+    \"POST\",\n          headers: { \"Content-Type\": \"application/json\" },\n          body:
+    JSON.stringify({ login, passphrase }),\n        });\n        document.getElementById(\"login-view\").classList.add(\"hidden\");\n
+    \       document.getElementById(\"tabbar\").style.display = \"flex\";\n        showView(\"chat\");\n
+    \       loadReadingStreak();\n      } catch (e) {\n        document.getElementById(\"login-error\").textContent
+    = \"Hmm, that didn't work. Try again? \U0001F914\";\n      }\n    }\n\n    function
+    showView(name) {\n      for (const v of [\"chat\", \"snap\", \"homework\", \"reading\",
+    \"timetable\"]) {\n        document.getElementById(v + \"-view\").classList.toggle(\"hidden\",
+    v !== name);\n      }\n      for (const btn of document.querySelectorAll(\".tab-btn\"))
+    {\n        btn.classList.toggle(\"active\", btn.dataset.view === name);\n      }\n
+    \     if (name === \"homework\") loadHomework();\n      if (name === \"reading\")
+    loadReadingStreak();\n      if (name === \"timetable\") loadTimetable();\n    }\n
+    \   document.querySelectorAll(\".tab-btn\").forEach(btn =>\n      btn.addEventListener(\"click\",
+    () => showView(btn.dataset.view))\n    );\n\n    function addChatBubble(text,
+    who) {\n      const log = document.getElementById(\"chat-log\");\n      const
+    div = document.createElement(\"div\");\n      div.className = \"msg \" + who;\n
+    \     div.textContent = text;\n      log.appendChild(div);\n      log.scrollTop
+    = log.scrollHeight;\n    }\n\n    async function sendChat() {\n      const input
+    = document.getElementById(\"chat-input\");\n      const text = input.value.trim();\n
+    \     if (!text) return;\n      input.value = \"\";\n      addChatBubble(text,
+    \"me\");\n      try {\n        const reply = await api(\"/chat\", {\n          method:
+    \"POST\",\n          headers: { \"Content-Type\": \"application/json\" },\n          body:
+    JSON.stringify({ text, conversation_id: conversationId }),\n        });\n        conversationId
+    = reply.conversation_id;\n        addChatBubble(reply.text, \"bot\");\n      }
+    catch (e) {\n        addChatBubble(\"Oops, I couldn't hear that. Try again? \U0001F615\",
+    \"bot\");\n      }\n    }\n\n    async function toggleRecording() {\n      const
+    btn = document.getElementById(\"mic-btn\");\n      if (mediaRecorder && mediaRecorder.state
+    === \"recording\") {\n        mediaRecorder.stop();\n        return;\n      }\n
+    \     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });\n
+    \     mediaRecorder = new MediaRecorder(stream);\n      audioChunks = [];\n      mediaRecorder.ondataavailable
+    = e => audioChunks.push(e.data);\n      mediaRecorder.onstop = async () => {\n
+    \       btn.classList.remove(\"recording\");\n        stream.getTracks().forEach(t
+    => t.stop());\n        const blob = new Blob(audioChunks, { type: \"audio/webm\"
+    });\n        addChatBubble(\"\U0001F399️ (voice message)\", \"me\");\n        const
+    form = new FormData();\n        form.append(\"audio\", blob, \"voice.webm\");\n
+    \       if (conversationId) form.append(\"conversation_id\", conversationId);\n
+    \       try {\n          const reply = await fetch(\"/api/tutor/voice\", {\n            method:
+    \"POST\", body: form, headers: { \"x-raghu-csrf\": \"1\" }, credentials: \"same-origin\",\n
+    \         });\n          const data = await reply.json();\n          if (!reply.ok)
+    throw new Error(data.detail);\n          conversationId = data.conversation_id;\n
+    \         addChatBubble(data.text, \"bot\");\n        } catch (e) {\n          addChatBubble(\"I
+    couldn't quite catch that. Try again? \U0001F615\", \"bot\");\n        }\n      };\n
+    \     mediaRecorder.start();\n      btn.classList.add(\"recording\");\n    }\n\n
+    \   async function doSnapAsk() {\n      const file = document.getElementById(\"snap-file\").files[0];\n
+    \     if (!file) return;\n      const preview = document.getElementById(\"snap-preview\");\n
+    \     preview.src = URL.createObjectURL(file);\n      preview.style.display =
+    \"block\";\n      const result = document.getElementById(\"snap-result\");\n      result.innerHTML
+    = \"\U0001F914 Thinking about your question...\";\n      const form = new FormData();\n
+    \     form.append(\"photo\", file);\n      try {\n        const r = await fetch(\"/api/tutor/snap-ask\",
+    {\n          method: \"POST\", body: form, headers: { \"x-raghu-csrf\": \"1\"
+    }, credentials: \"same-origin\",\n        });\n        const data = await r.json();\n
+    \       if (!r.ok || !data.could_read_page) {\n          result.innerHTML = \"\U0001F615
+    I couldn't read that clearly — try a closer, brighter photo!\";\n          return;\n
+    \       }\n        result.innerHTML =\n          (data.question_text ? `<div class=\"q\">\U0001F4D6
+    ${data.question_text}</div>` : \"\") +\n          `<div>${data.concept_explanation}</div>`;\n
+    \     } catch (e) {\n        result.innerHTML = \"\U0001F615 Something went wrong.
+    Try again?\";\n      }\n    }\n\n    function homeworkRow(h) {\n      return `<div
+    class=\"hw-item ${h.status === 'done' ? 'done' : ''}\">\n        <div><b>${h.subject}</b>:
+    ${h.description}${h.due_date ? ` (due ${h.due_date})` : \"\"}</div>\n        ${h.status
+    === \"pending\" ? `<button onclick=\"completeHomework('${h.id}')\">✓</button>`
+    : \"\"}\n      </div>`;\n    }\n\n    async function loadHomework() {\n      const
+    rows = await api(\"/tutor/homework\");\n      document.getElementById(\"hw-list\").innerHTML
+    =\n        rows.length ? rows.map(homeworkRow).join(\"\") : '<div class=\"status-msg\">Nothing
+    yet — add something below! \U0001F389</div>';\n    }\n\n    async function addHomework()
+    {\n      const subject = document.getElementById(\"hw-subject\").value.trim();\n
+    \     const description = document.getElementById(\"hw-desc\").value.trim();\n
+    \     const due_date = document.getElementById(\"hw-due\").value || null;\n      if
+    (!subject || !description) return;\n      await api(\"/tutor/homework\", {\n        method:
+    \"POST\",\n        headers: { \"Content-Type\": \"application/json\" },\n        body:
+    JSON.stringify({ subject, description, due_date }),\n      });\n      document.getElementById(\"hw-subject\").value
+    = \"\";\n      document.getElementById(\"hw-desc\").value = \"\";\n      document.getElementById(\"hw-due\").value
+    = \"\";\n      loadHomework();\n    }\n\n    async function completeHomework(id)
+    {\n      await api(`/tutor/homework/${id}/complete`, { method: \"POST\" });\n
+    \     loadHomework();\n    }\n\n    async function loadReadingStreak() {\n      const
+    s = await api(\"/tutor/reading-streak\");\n      document.getElementById(\"streak-badge\").textContent
+    = \"\U0001F525 \" + s.reading_streak_days;\n    }\n\n    async function logReading()
+    {\n      const detail = document.getElementById(\"read-book\").value.trim() ||
+    null;\n      const minutes = parseFloat(document.getElementById(\"read-minutes\").value)
+    || null;\n      await api(\"/tutor/activity\", {\n        method: \"POST\",\n
+    \       headers: { \"Content-Type\": \"application/json\" },\n        body: JSON.stringify({
+    kind: \"reading\", detail, minutes }),\n      });\n      document.getElementById(\"read-book\").value
+    = \"\";\n      document.getElementById(\"read-minutes\").value = \"\";\n      loadReadingStreak();\n
+    \   }\n\n    async function loadTimetable() {\n      const rows = await api(\"/tutor/timetable\");\n
+    \     const byDay = Object.fromEntries(rows.map(r => [r.day_of_week, r.periods]));\n
+    \     document.getElementById(\"timetable-list\").innerHTML = DAY_NAMES.map((name,
+    i) => {\n        const periods = byDay[i] || [];\n        return `<div class=\"day-row\"><h3>${name}</h3>${\n
+    \         periods.length\n            ? periods.map(p => `<div class=\"period\">${p.start_time
+    || \"\"} ${p.subject}</div>`).join(\"\")\n            : '<div class=\"period\"
+    style=\"color:#bbb\">No classes set</div>'\n        }</div>`;\n      }).join(\"\");\n
+    \   }\n  </script>\n</body>\n</html>\n"
+kind: ConfigMap
+metadata:
+  name: shona-study
+  namespace: shona-learning
