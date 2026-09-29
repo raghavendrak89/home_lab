@@ -100,35 +100,62 @@ data:
     fox who makes friends with the moon\"></textarea>\n        <button class=\"big-btn\"
     id=\"story-btn\" onclick=\"createStory()\">✨ Write my story!</button>\n      </div>\n
     \     <div id=\"story-status\" style=\"text-align:center; color:#888; margin-bottom:14px;\"></div>\n
-    \     <div id=\"story-list\"></div>\n    </div>\n  </div>\n\n  <div class=\"tabbar\"
-    id=\"tabbar\" style=\"display:none\">\n    <button class=\"tab-btn active\" data-view=\"chat\"><span
-    class=\"emoji\">\U0001F4AC</span>Chat</button>\n    <button class=\"tab-btn\"
-    data-view=\"snap\"><span class=\"emoji\">\U0001F4F8</span>Snap</button>\n    <button
-    class=\"tab-btn\" data-view=\"homework\"><span class=\"emoji\">\U0001F4DA</span>Homework</button>\n
+    \     <div id=\"story-list\"></div>\n    </div>\n\n    <!-- Wellness -->\n    <div
+    id=\"wellness-view\" class=\"hidden\">\n      <h2>\U0001F308 My Wellness</h2>\n
+    \     <div id=\"wellness-stats\" style=\"text-align:center; margin-bottom:16px;\"></div>\n
+    \     <div class=\"form-row\">\n        <div style=\"display:flex; gap:8px; flex-wrap:wrap;\">\n
+    \         <input id=\"wellness-minutes\" type=\"number\" placeholder=\"minutes\"
+    style=\"width:90px; padding:10px; border:2px solid #ccc; border-radius:10px;\">\n
+    \         <button class=\"big-btn\" style=\"flex:1\" onclick=\"logWellness('activity_minutes',
+    {minutes: numVal('wellness-minutes')})\">\U0001F3C3 I was active!</button>\n        </div>\n
+    \       <div style=\"display:flex; gap:8px; flex-wrap:wrap;\">\n          <input
+    id=\"wellness-sport\" placeholder=\"which sport?\" style=\"width:120px; padding:10px;
+    border:2px solid #ccc; border-radius:10px;\">\n          <input id=\"wellness-sport-minutes\"
+    type=\"number\" placeholder=\"minutes\" style=\"width:90px; padding:10px; border:2px
+    solid #ccc; border-radius:10px;\">\n          <button class=\"big-btn\" style=\"flex:1\"
+    onclick=\"logWellness('sport', {detail: strVal('wellness-sport'), minutes: numVal('wellness-sport-minutes')})\">⚽
+    I played a sport!</button>\n        </div>\n        <button class=\"big-btn\"
+    onclick=\"logWellness('hydration', {count: 1})\">\U0001F4A7 I drank some water!</button>\n
+    \       <button class=\"big-btn\" onclick=\"logWellness('sleep_consistency', {})\">\U0001F634
+    I slept well & on time!</button>\n        <div style=\"display:flex; gap:8px;
+    flex-wrap:wrap;\">\n          <input id=\"wellness-colors\" placeholder=\"which
+    colors?\" style=\"width:140px; padding:10px; border:2px solid #ccc; border-radius:10px;\">\n
+    \         <button class=\"big-btn\" style=\"flex:1\" onclick=\"logWellness('rainbow_plate',
+    {count: 1, detail: strVal('wellness-colors')})\">\U0001F308 Rainbow plate today!</button>\n
+    \       </div>\n      </div>\n      <div id=\"wellness-goals\" style=\"margin-top:16px;\"></div>\n
+    \     <div id=\"wellness-challenges\" style=\"margin-top:16px;\"></div>\n    </div>\n
+    \ </div>\n\n  <div class=\"tabbar\" id=\"tabbar\" style=\"display:none\">\n    <button
+    class=\"tab-btn active\" data-view=\"chat\"><span class=\"emoji\">\U0001F4AC</span>Chat</button>\n
+    \   <button class=\"tab-btn\" data-view=\"snap\"><span class=\"emoji\">\U0001F4F8</span>Snap</button>\n
+    \   <button class=\"tab-btn\" data-view=\"homework\"><span class=\"emoji\">\U0001F4DA</span>Homework</button>\n
     \   <button class=\"tab-btn\" data-view=\"reading\"><span class=\"emoji\">\U0001F4D6</span>Reading</button>\n
     \   <button class=\"tab-btn\" data-view=\"storybook\"><span class=\"emoji\">\U0001F3A8</span>Stories</button>\n
+    \   <button class=\"tab-btn\" data-view=\"wellness\"><span class=\"emoji\">\U0001F308</span>Wellness</button>\n
     \   <button class=\"tab-btn\" data-view=\"timetable\"><span class=\"emoji\">\U0001F5D3️</span>Timetable</button>\n
     \ </div>\n\n  <script>\n    const DAY_NAMES = [\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\",\"Saturday\",\"Sunday\"];\n
     \   let conversationId = null;\n    let mediaRecorder = null;\n    let audioChunks
-    = [];\n\n    async function api(path, opts = {}) {\n      opts.headers = Object.assign({
-    \"x-raghu-csrf\": \"1\" }, opts.headers || {});\n      opts.credentials = \"same-origin\";\n
-    \     const r = await fetch(\"/api\" + path, opts);\n      if (!r.ok) throw new
-    Error((await r.json().catch(() => ({}))).detail || r.statusText);\n      return
-    r.json();\n    }\n\n    async function doLogin() {\n      const login = document.getElementById(\"login-input\").value.trim();\n
+    = [];\n    let myUserId = null;\n\n    async function api(path, opts = {}) {\n
+    \     opts.headers = Object.assign({ \"x-raghu-csrf\": \"1\" }, opts.headers ||
+    {});\n      opts.credentials = \"same-origin\";\n      const r = await fetch(\"/api\"
+    + path, opts);\n      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail
+    || r.statusText);\n      return r.json();\n    }\n\n    async function doLogin()
+    {\n      const login = document.getElementById(\"login-input\").value.trim();\n
     \     const passphrase = document.getElementById(\"pass-input\").value;\n      document.getElementById(\"login-error\").textContent
     = \"\";\n      try {\n        await api(\"/auth/login\", {\n          method:
     \"POST\",\n          headers: { \"Content-Type\": \"application/json\" },\n          body:
-    JSON.stringify({ login, passphrase }),\n        });\n        document.getElementById(\"login-view\").classList.add(\"hidden\");\n
+    JSON.stringify({ login, passphrase }),\n        });\n        const me = await
+    api(\"/auth/me\");\n        myUserId = me.user_id;\n        document.getElementById(\"login-view\").classList.add(\"hidden\");\n
     \       document.getElementById(\"tabbar\").style.display = \"flex\";\n        showView(\"chat\");\n
     \       loadReadingStreak();\n      } catch (e) {\n        document.getElementById(\"login-error\").textContent
     = \"Hmm, that didn't work. Try again? \U0001F914\";\n      }\n    }\n\n    function
     showView(name) {\n      for (const v of [\"chat\", \"snap\", \"homework\", \"reading\",
-    \"timetable\", \"storybook\"]) {\n        document.getElementById(v + \"-view\").classList.toggle(\"hidden\",
-    v !== name);\n      }\n      for (const btn of document.querySelectorAll(\".tab-btn\"))
-    {\n        btn.classList.toggle(\"active\", btn.dataset.view === name);\n      }\n
-    \     if (name === \"homework\") loadHomework();\n      if (name === \"reading\")
-    loadReadingStreak();\n      if (name === \"timetable\") loadTimetable();\n      if
-    (name === \"storybook\") loadStories();\n    }\n    document.querySelectorAll(\".tab-btn\").forEach(btn
+    \"timetable\", \"storybook\", \"wellness\"]) {\n        document.getElementById(v
+    + \"-view\").classList.toggle(\"hidden\", v !== name);\n      }\n      for (const
+    btn of document.querySelectorAll(\".tab-btn\")) {\n        btn.classList.toggle(\"active\",
+    btn.dataset.view === name);\n      }\n      if (name === \"homework\") loadHomework();\n
+    \     if (name === \"reading\") loadReadingStreak();\n      if (name === \"timetable\")
+    loadTimetable();\n      if (name === \"storybook\") loadStories();\n      if (name
+    === \"wellness\") loadWellness();\n    }\n    document.querySelectorAll(\".tab-btn\").forEach(btn
     =>\n      btn.addEventListener(\"click\", () => showView(btn.dataset.view))\n
     \   );\n\n    function addChatBubble(text, who) {\n      const log = document.getElementById(\"chat-log\");\n
     \     const div = document.createElement(\"div\");\n      div.className = \"msg
@@ -222,7 +249,37 @@ data:
     },\n          body: JSON.stringify({ idea }),\n        });\n        document.getElementById(\"story-idea\").value
     = \"\";\n        status.textContent = \"\";\n        loadStories();\n      } catch
     (e) {\n        status.textContent = \"\U0001F615 Something went wrong. Try again?\";\n
-    \     }\n      btn.disabled = false;\n    }\n  </script>\n</body>\n</html>\n"
+    \     }\n      btn.disabled = false;\n    }\n\n    function numVal(id) {\n      const
+    v = parseFloat(document.getElementById(id).value);\n      return isNaN(v) ? undefined
+    : v;\n    }\n    function strVal(id) {\n      const v = document.getElementById(id).value.trim();\n
+    \     return v || undefined;\n    }\n\n    async function logWellness(kind, extra)
+    {\n      try {\n        await api(\"/wellness/logs\", {\n          method: \"POST\",\n
+    \         headers: { \"Content-Type\": \"application/json\" },\n          body:
+    JSON.stringify({ kind, ...extra }),\n        });\n        [\"wellness-minutes\",
+    \"wellness-sport\", \"wellness-sport-minutes\", \"wellness-colors\"].forEach(id
+    => {\n          const el = document.getElementById(id);\n          if (el) el.value
+    = \"\";\n        });\n        loadWellness();\n      } catch (e) {\n        alert(\"Oops,
+    that didn't save. Try again?\");\n      }\n    }\n\n    async function loadWellness()
+    {\n      const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0,
+    10);\n      const [s, goals, challenges] = await Promise.all([\n        api(`/wellness/summary?since=${since}`),\n
+    \       api(\"/wellness/goals\"),\n        api(\"/wellness/challenges\"),\n      ]);\n
+    \     document.getElementById(\"wellness-stats\").innerHTML =\n        `\U0001F3C3
+    ${s.active_minutes_total} active min · \U0001F308 ${s.rainbow_plate_days} rainbow
+    days · ` +\n        `\U0001F4A7 ${s.hydration_days_logged} hydration days · \U0001F634
+    ${s.sleep_consistency_days_logged} good sleeps ` +\n        `<span style=\"color:#bbb\">(this
+    week)</span>`;\n\n      document.getElementById(\"wellness-goals\").innerHTML
+    = goals.length\n        ? \"<h3 style='color:#764ba2;margin-bottom:8px;'>\U0001F3AF
+    My Goals</h3>\" +\n          goals.map(g => `<div class=\"period\">${g.kind.replaceAll(\"_\",
+    \" \")}: ${g.target_value} ${g.target_unit}</div>`).join(\"\")\n        : \"\";\n\n
+    \     document.getElementById(\"wellness-challenges\").innerHTML = challenges.length\n
+    \       ? \"<h3 style='color:#764ba2;margin-bottom:8px;'>\U0001F3C6 Family Challenges</h3>\"
+    +\n          challenges.map(c => {\n            const mine = c.progress[myUserId];\n
+    \           const pct = mine ? Math.min(100, (mine.value / c.target_value) * 100)
+    : 0;\n            return `<div style=\"margin-bottom:10px;\"><b>${c.title}</b>\n
+    \             <div class=\"h-bar\" style=\"background:#f0ecff;border-radius:8px;height:14px;overflow:hidden;margin-top:4px;\">\n
+    \               <div style=\"background:linear-gradient(135deg,#667eea,#764ba2);height:14px;width:${pct}%\"></div>\n
+    \             </div></div>`;\n          }).join(\"\")\n        : \"\";\n    }\n
+    \ </script>\n</body>\n</html>\n"
 kind: ConfigMap
 metadata:
   name: shona-study

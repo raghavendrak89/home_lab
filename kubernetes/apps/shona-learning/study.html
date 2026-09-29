@@ -237,6 +237,31 @@
       <div id="story-status" style="text-align:center; color:#888; margin-bottom:14px;"></div>
       <div id="story-list"></div>
     </div>
+
+    <!-- Wellness -->
+    <div id="wellness-view" class="hidden">
+      <h2>🌈 My Wellness</h2>
+      <div id="wellness-stats" style="text-align:center; margin-bottom:16px;"></div>
+      <div class="form-row">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input id="wellness-minutes" type="number" placeholder="minutes" style="width:90px; padding:10px; border:2px solid #ccc; border-radius:10px;">
+          <button class="big-btn" style="flex:1" onclick="logWellness('activity_minutes', {minutes: numVal('wellness-minutes')})">🏃 I was active!</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input id="wellness-sport" placeholder="which sport?" style="width:120px; padding:10px; border:2px solid #ccc; border-radius:10px;">
+          <input id="wellness-sport-minutes" type="number" placeholder="minutes" style="width:90px; padding:10px; border:2px solid #ccc; border-radius:10px;">
+          <button class="big-btn" style="flex:1" onclick="logWellness('sport', {detail: strVal('wellness-sport'), minutes: numVal('wellness-sport-minutes')})">⚽ I played a sport!</button>
+        </div>
+        <button class="big-btn" onclick="logWellness('hydration', {count: 1})">💧 I drank some water!</button>
+        <button class="big-btn" onclick="logWellness('sleep_consistency', {})">😴 I slept well & on time!</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input id="wellness-colors" placeholder="which colors?" style="width:140px; padding:10px; border:2px solid #ccc; border-radius:10px;">
+          <button class="big-btn" style="flex:1" onclick="logWellness('rainbow_plate', {count: 1, detail: strVal('wellness-colors')})">🌈 Rainbow plate today!</button>
+        </div>
+      </div>
+      <div id="wellness-goals" style="margin-top:16px;"></div>
+      <div id="wellness-challenges" style="margin-top:16px;"></div>
+    </div>
   </div>
 
   <div class="tabbar" id="tabbar" style="display:none">
@@ -245,6 +270,7 @@
     <button class="tab-btn" data-view="homework"><span class="emoji">📚</span>Homework</button>
     <button class="tab-btn" data-view="reading"><span class="emoji">📖</span>Reading</button>
     <button class="tab-btn" data-view="storybook"><span class="emoji">🎨</span>Stories</button>
+    <button class="tab-btn" data-view="wellness"><span class="emoji">🌈</span>Wellness</button>
     <button class="tab-btn" data-view="timetable"><span class="emoji">🗓️</span>Timetable</button>
   </div>
 
@@ -253,6 +279,7 @@
     let conversationId = null;
     let mediaRecorder = null;
     let audioChunks = [];
+    let myUserId = null;
 
     async function api(path, opts = {}) {
       opts.headers = Object.assign({ "x-raghu-csrf": "1" }, opts.headers || {});
@@ -272,6 +299,8 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ login, passphrase }),
         });
+        const me = await api("/auth/me");
+        myUserId = me.user_id;
         document.getElementById("login-view").classList.add("hidden");
         document.getElementById("tabbar").style.display = "flex";
         showView("chat");
@@ -282,7 +311,7 @@
     }
 
     function showView(name) {
-      for (const v of ["chat", "snap", "homework", "reading", "timetable", "storybook"]) {
+      for (const v of ["chat", "snap", "homework", "reading", "timetable", "storybook", "wellness"]) {
         document.getElementById(v + "-view").classList.toggle("hidden", v !== name);
       }
       for (const btn of document.querySelectorAll(".tab-btn")) {
@@ -292,6 +321,7 @@
       if (name === "reading") loadReadingStreak();
       if (name === "timetable") loadTimetable();
       if (name === "storybook") loadStories();
+      if (name === "wellness") loadWellness();
     }
     document.querySelectorAll(".tab-btn").forEach(btn =>
       btn.addEventListener("click", () => showView(btn.dataset.view))
@@ -486,6 +516,62 @@
         status.textContent = "😕 Something went wrong. Try again?";
       }
       btn.disabled = false;
+    }
+
+    function numVal(id) {
+      const v = parseFloat(document.getElementById(id).value);
+      return isNaN(v) ? undefined : v;
+    }
+    function strVal(id) {
+      const v = document.getElementById(id).value.trim();
+      return v || undefined;
+    }
+
+    async function logWellness(kind, extra) {
+      try {
+        await api("/wellness/logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kind, ...extra }),
+        });
+        ["wellness-minutes", "wellness-sport", "wellness-sport-minutes", "wellness-colors"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = "";
+        });
+        loadWellness();
+      } catch (e) {
+        alert("Oops, that didn't save. Try again?");
+      }
+    }
+
+    async function loadWellness() {
+      const since = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+      const [s, goals, challenges] = await Promise.all([
+        api(`/wellness/summary?since=${since}`),
+        api("/wellness/goals"),
+        api("/wellness/challenges"),
+      ]);
+      document.getElementById("wellness-stats").innerHTML =
+        `🏃 ${s.active_minutes_total} active min · 🌈 ${s.rainbow_plate_days} rainbow days · ` +
+        `💧 ${s.hydration_days_logged} hydration days · 😴 ${s.sleep_consistency_days_logged} good sleeps ` +
+        `<span style="color:#bbb">(this week)</span>`;
+
+      document.getElementById("wellness-goals").innerHTML = goals.length
+        ? "<h3 style='color:#764ba2;margin-bottom:8px;'>🎯 My Goals</h3>" +
+          goals.map(g => `<div class="period">${g.kind.replaceAll("_", " ")}: ${g.target_value} ${g.target_unit}</div>`).join("")
+        : "";
+
+      document.getElementById("wellness-challenges").innerHTML = challenges.length
+        ? "<h3 style='color:#764ba2;margin-bottom:8px;'>🏆 Family Challenges</h3>" +
+          challenges.map(c => {
+            const mine = c.progress[myUserId];
+            const pct = mine ? Math.min(100, (mine.value / c.target_value) * 100) : 0;
+            return `<div style="margin-bottom:10px;"><b>${c.title}</b>
+              <div class="h-bar" style="background:#f0ecff;border-radius:8px;height:14px;overflow:hidden;margin-top:4px;">
+                <div style="background:linear-gradient(135deg,#667eea,#764ba2);height:14px;width:${pct}%"></div>
+              </div></div>`;
+          }).join("")
+        : "";
     }
   </script>
 </body>
