@@ -225,6 +225,18 @@
       <h2>🗓️ School Timetable</h2>
       <div id="timetable-list"></div>
     </div>
+
+    <!-- Storybook -->
+    <div id="storybook-view" class="hidden">
+      <h2>🎨 Creative Studio</h2>
+      <p style="color:#888; margin-bottom: 14px;">Tell me a bedtime story idea and I'll write it with a picture!</p>
+      <div class="form-row">
+        <textarea id="story-idea" rows="3" placeholder="e.g. A brave little fox who makes friends with the moon"></textarea>
+        <button class="big-btn" id="story-btn" onclick="createStory()">✨ Write my story!</button>
+      </div>
+      <div id="story-status" style="text-align:center; color:#888; margin-bottom:14px;"></div>
+      <div id="story-list"></div>
+    </div>
   </div>
 
   <div class="tabbar" id="tabbar" style="display:none">
@@ -232,6 +244,7 @@
     <button class="tab-btn" data-view="snap"><span class="emoji">📸</span>Snap</button>
     <button class="tab-btn" data-view="homework"><span class="emoji">📚</span>Homework</button>
     <button class="tab-btn" data-view="reading"><span class="emoji">📖</span>Reading</button>
+    <button class="tab-btn" data-view="storybook"><span class="emoji">🎨</span>Stories</button>
     <button class="tab-btn" data-view="timetable"><span class="emoji">🗓️</span>Timetable</button>
   </div>
 
@@ -269,7 +282,7 @@
     }
 
     function showView(name) {
-      for (const v of ["chat", "snap", "homework", "reading", "timetable"]) {
+      for (const v of ["chat", "snap", "homework", "reading", "timetable", "storybook"]) {
         document.getElementById(v + "-view").classList.toggle("hidden", v !== name);
       }
       for (const btn of document.querySelectorAll(".tab-btn")) {
@@ -278,6 +291,7 @@
       if (name === "homework") loadHomework();
       if (name === "reading") loadReadingStreak();
       if (name === "timetable") loadTimetable();
+      if (name === "storybook") loadStories();
     }
     document.querySelectorAll(".tab-btn").forEach(btn =>
       btn.addEventListener("click", () => showView(btn.dataset.view))
@@ -435,6 +449,43 @@
             : '<div class="period" style="color:#bbb">No classes set</div>'
         }</div>`;
       }).join("");
+    }
+
+    function storyCard(story) {
+      return `<div class="hw-item" style="flex-direction:column; align-items:stretch; gap:8px;">
+        <b>${story.title}</b>
+        ${story.image_url ? `<img src="${story.image_url}" style="max-width:100%; border-radius:12px;">` : ""}
+        <div>${story.chapter_text}</div>
+      </div>`;
+    }
+
+    async function loadStories() {
+      const rows = await api("/tutor/stories");
+      document.getElementById("story-list").innerHTML = rows.length
+        ? rows.map(storyCard).join("")
+        : '<div class="status-msg">No stories yet — write your first one above! ✨</div>';
+    }
+
+    async function createStory() {
+      const idea = document.getElementById("story-idea").value.trim();
+      if (!idea) return;
+      const btn = document.getElementById("story-btn");
+      const status = document.getElementById("story-status");
+      btn.disabled = true;
+      status.innerHTML = "✨ Writing your story and drawing a picture... this takes a minute or two!";
+      try {
+        await api("/tutor/stories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idea }),
+        });
+        document.getElementById("story-idea").value = "";
+        status.textContent = "";
+        loadStories();
+      } catch (e) {
+        status.textContent = "😕 Something went wrong. Try again?";
+      }
+      btn.disabled = false;
     }
   </script>
 </body>
