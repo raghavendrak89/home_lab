@@ -485,6 +485,7 @@
       return `<div class="hw-item" style="flex-direction:column; align-items:stretch; gap:8px;">
         <b>${story.title}</b>
         ${story.image_url ? `<img src="${story.image_url}" style="max-width:100%; border-radius:12px;">` : ""}
+        ${story.audio_url ? `<audio controls style="width:100%;" src="${story.audio_url}"></audio>` : ""}
         <div>${story.chapter_text}</div>
       </div>`;
     }

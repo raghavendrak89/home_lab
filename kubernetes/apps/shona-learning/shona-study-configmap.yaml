@@ -235,12 +235,13 @@ data:
     \   }\n\n    function storyCard(story) {\n      return `<div class=\"hw-item\"
     style=\"flex-direction:column; align-items:stretch; gap:8px;\">\n        <b>${story.title}</b>\n
     \       ${story.image_url ? `<img src=\"${story.image_url}\" style=\"max-width:100%;
-    border-radius:12px;\">` : \"\"}\n        <div>${story.chapter_text}</div>\n      </div>`;\n
-    \   }\n\n    async function loadStories() {\n      const rows = await api(\"/tutor/stories\");\n
-    \     document.getElementById(\"story-list\").innerHTML = rows.length\n        ?
-    rows.map(storyCard).join(\"\")\n        : '<div class=\"status-msg\">No stories
-    yet — write your first one above! ✨</div>';\n    }\n\n    async function createStory()
-    {\n      const idea = document.getElementById(\"story-idea\").value.trim();\n
+    border-radius:12px;\">` : \"\"}\n        ${story.audio_url ? `<audio controls
+    style=\"width:100%;\" src=\"${story.audio_url}\"></audio>` : \"\"}\n        <div>${story.chapter_text}</div>\n
+    \     </div>`;\n    }\n\n    async function loadStories() {\n      const rows
+    = await api(\"/tutor/stories\");\n      document.getElementById(\"story-list\").innerHTML
+    = rows.length\n        ? rows.map(storyCard).join(\"\")\n        : '<div class=\"status-msg\">No
+    stories yet — write your first one above! ✨</div>';\n    }\n\n    async function
+    createStory() {\n      const idea = document.getElementById(\"story-idea\").value.trim();\n
     \     if (!idea) return;\n      const btn = document.getElementById(\"story-btn\");\n
     \     const status = document.getElementById(\"story-status\");\n      btn.disabled
     = true;\n      status.innerHTML = \"✨ Writing your story and drawing a picture...
