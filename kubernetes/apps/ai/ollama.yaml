@@ -29,6 +29,15 @@ spec:
           env:
             - name: OLLAMA_MODELS
               value: /models
+            # Single RTX 3090 (24GB VRAM), shared by several homelab apps, with local
+            # models ranging 5-19GB each — two of the bigger ones can't be resident at
+            # once. Left on the default "auto", Ollama tries to keep multiple models
+            # loaded and thrashes (evict+reload, multi-second stalls) under concurrent
+            # cross-model use instead of failing predictably. Pin to 1 so a second
+            # model request always evicts the first outright rather than fighting for
+            # VRAM headroom.
+            - name: OLLAMA_MAX_LOADED_MODELS
+              value: "1"
           resources:
             requests:
               cpu: "2"
